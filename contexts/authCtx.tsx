@@ -1,17 +1,16 @@
-import { useContext, createContext, type PropsWithChildren } from 'react';
-import { useStorageState } from './useStorageState';
+import { useContext, createContext, type PropsWithChildren, useEffect } from 'react';
 import { TUserData } from '@/apis/firebase';
-import { Alert } from 'react-native';
+import useSignIn from '@/util/useSignIn';
 
-const AuthContext = createContext<{
-  signIn: (user: TUserData) => void;
+export const AuthContext = createContext<{
+  signIn: (method: string) => void;
   signOut: () => void;
-  session?: TUserData | null;
+  user?: TUserData | null;
   isLoading: boolean;
 }>({
-  signIn: (user: TUserData) => {},
+  signIn: () => {},
   signOut: () => {},
-  session: null,
+  user: null,
   isLoading: false,
 });
 
@@ -28,22 +27,22 @@ export function useSession() {
 }
 
 export function SessionProvider({ children }: PropsWithChildren) {
-  const [[isLoading, session], setSession] = useStorageState('session');
-
+  const [user, isLoading, signInWithGoogle, signInWithPhone, signInWithApple] = useSignIn();
+  
   return (
     <AuthContext.Provider
       value={{
-        signIn: (userData: TUserData) => {
+        signIn: (method: string, value: string) => {
           // Perform sign-in logic here
-          if (!userData && userData.uid) {
-            Alert.alert('Invalid Information', 'Invalida user information, you must sign in with valid credential to use this app.');
-          };
-          setSession(userData);
+          if (method === 'google') 
+            signInWithGoogle();
+          if (method === 'phone') 
+            signInWithPhone(value);
         },
         signOut: () => {
           setSession(null);
         },
-        session,
+        user,
         isLoading,
       }}>
       {children}

@@ -5,7 +5,7 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "myapp",
+    "scheme": "lilidelivery",
     "userInterfaceStyle": "automatic",
     "splash": {
       "image": "./assets/images/splash.png",
@@ -14,15 +14,16 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.jomudev.delivery"
+      "bundleIdentifier": "com.jomudev.deliveryClient",
+      "googleServicesFile": "./ios/deliveryClient/GoogleService-Info.plist"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff",
-        "googleServicesFile": "./google-services.json"
+        "googleServicesFile": "./android/app/google-services.json"
       },
-      "package": "com.jomudev.delivery"
+      "package": "com.jomudev.deliveryClient"
     },
     "web": {
       "bundler": "metro",
@@ -31,7 +32,28 @@
     },
     "plugins": [
       "expo-router",
-      "@react-native-google-signin/google-signin",
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Allow $(PRODUCT_NAME) to use your location."
+        }
+      ],
+      [
+        "@react-native-google-signin/google-signin",
+        {
+          "scopes": [
+            "email"
+          ],
+          "webClientId": "61627095781-fjgqtei41l1qgcjg8rmoddg2lssuc58b.apps.googleusercontent.com",
+          "iosUrlScheme": "com.googleusercontent.apps.61627095781-gqmiisu1as6lvkm85hce1soa8lh2r4m8"
+        }
+      ],
+      [
+        "expo-secure-store",
+        {
+          "faceIDPermission": "Allow $(PRODUCT_NAME) to access your Face ID biometric data."
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true
@@ -43,6 +65,7 @@
       "eas": {
         "projectId": "eb80c124-a963-42b4-aa63-859a95833731"
       }
-    }
+    },
+    "owner": "jomudevelopment"
   }
 }

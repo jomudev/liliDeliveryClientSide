@@ -1,6 +1,5 @@
 import { initializeApp } from 'firebase/app';
-import { getAuth, User, UserMetadata, } from 'firebase/auth';
-import { getMessaging } from 'firebase/messaging';
+import { getAuth, setPersistence } from 'firebase/auth';
 
 const firebaseConfig = {
   apiKey: "AIzaSyARRYqaaGomXWAYJeRxW7Esx5YvWUMfKwg",
@@ -13,12 +12,6 @@ const firebaseConfig = {
 
 export const app = initializeApp(firebaseConfig);
 
-export type TUserData = {
-  uid: string;
-  displayName: string,
-  email: string,
-  photoURL: string,
-  phone: string,
-};  
 export const auth = getAuth(app);
-export const messaging = getMessaging(app);
+
+export type TUserData = typeof auth.currentUser;

@@ -1,13 +1,12 @@
-import { Image, StyleSheet, Platform, TextInput } from 'react-native';
-
+import { Image, StyleSheet } from 'react-native';
 import { HelloWave } from '@/components/HelloWave';
 import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
 import ParallaxViewHeader from '@/components/ParallaxViewHeader';
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { randomDishImageURL } from '@/util/randomDishImage';
 import RestaurantCard from '@/components/RestaurantCard';
+import { AuthContext } from '@/contexts/authCtx';
+import { Avatar } from '@rneui/themed';
 
 const restaurantsData = [
   {
@@ -44,11 +43,14 @@ const restaurantsData = [
 
 export default function HomeScreen() {
   const [headerImage, setHeaderImage] = useState('');
+  const { user } = useContext(AuthContext);
+
   useEffect(() => {
     randomDishImageURL().then((imageURL) => {
       setHeaderImage(imageURL);
     })
   }, []);
+
   return (
     <ParallaxScrollView
       headerBackgroundColor={{ light: '#FFE37E', dark: '#FF7D70' }}
@@ -63,7 +65,8 @@ export default function HomeScreen() {
           title={'Your wish is my command'} 
           subtitle={'Find your favorites'}
           lightColor='white'
-          darkColor='white'> 
+          darkColor='white'>
+            <Avatar size={32} source={{ uri: user?.photoURL }} rounded containerStyle={styles.avatar} />
         </ParallaxViewHeader>
       }
       >
@@ -85,6 +88,11 @@ const styles = StyleSheet.create({
   stepContainer: {
     gap: 8,
     marginBottom: 8,
+  },
+  avatar: {
+    position: 'absolute',
+    top: 16,
+    right: 16,
   },
   headerImage: {
     height: '100%',

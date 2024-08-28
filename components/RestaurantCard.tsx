@@ -43,7 +43,7 @@ export default function RestaurantCard ({
         <ThemedText style={styles.averageDeliveryTimeText} type={'defaultSemiBold'} lightColor="white" darkColor="white">
           { averageDeliveryTime } min
         </ThemedText>
-        <MaterialIcons name={'delivery-dining'} size={32} color={"#fff"}/>
+        <MaterialIcons style={styles.deliveryTimeIcon} name={'delivery-dining'} size={28} color={"#fff"}/>
       </BlurView>
       <BlurView intensity={60} tint={'dark'} style={[styles.businessDetails, styles.deliveryPrice]}> 
         <ThemedText style={styles.deliveryPriceText} type={'defaultSemiBold'} lightColor="white" darkColor="white">
@@ -125,5 +125,9 @@ const styles = StyleSheet.create({
   deliveryPriceText: {
     textAlign: 'center',
     textAlignVertical: 'center',
+  },
+  deliveryTimeIcon: {
+    textAlign: 'center',
+    alignSelf: 'center',
   },
 });
