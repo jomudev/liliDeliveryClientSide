@@ -15,9 +15,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-               BuildableName = "deliveryClient.app"
-               BlueprintName = "deliveryClient"
-               ReferencedContainer = "container:deliveryClient.xcodeproj">
+               BuildableName = "LilisDelivery.app"
+               BlueprintName = "LilisDelivery"
+               ReferencedContainer = "container:LilisDelivery.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -33,9 +33,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "00E356ED1AD99517003FC87E"
-               BuildableName = "deliveryClientTests.xctest"
-               BlueprintName = "deliveryClientTests"
-               ReferencedContainer = "container:deliveryClient.xcodeproj">
+               BuildableName = "LilisDeliveryTests.xctest"
+               BlueprintName = "LilisDeliveryTests"
+               ReferencedContainer = "container:LilisDelivery.xcodeproj">
             </BuildableReference>
          </TestableReference>
       </Testables>
@@ -55,9 +55,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-            BuildableName = "deliveryClient.app"
-            BlueprintName = "deliveryClient"
-            ReferencedContainer = "container:deliveryClient.xcodeproj">
+            BuildableName = "LilisDelivery.app"
+            BlueprintName = "LilisDelivery"
+            ReferencedContainer = "container:LilisDelivery.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </LaunchAction>
@@ -72,9 +72,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-            BuildableName = "deliveryClient.app"
-            BlueprintName = "deliveryClient"
-            ReferencedContainer = "container:deliveryClient.xcodeproj">
+            BuildableName = "LilisDelivery.app"
+            BlueprintName = "LilisDelivery"
+            ReferencedContainer = "container:LilisDelivery.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>

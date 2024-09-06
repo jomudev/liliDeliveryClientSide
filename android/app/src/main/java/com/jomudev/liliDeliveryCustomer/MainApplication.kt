@@ -1,4 +1,4 @@
-package com.jomudev.deliveryClient
+package com.jomudev.liliDeliveryCustomer
 
 import android.app.Application
 import android.content.res.Configuration

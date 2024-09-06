@@ -14,33 +14,27 @@ export const AuthContext = createContext<{
   isLoading: false,
 });
 
-// This hook can be used to access the user info.
-export function useSession() {
-  const value = useContext(AuthContext);
-  if (process.env.NODE_ENV !== 'production') {
-    if (!value) {
-      throw new Error('useSession must be wrapped in a <SessionProvider />');
-    }
-  }
-
-  return value;
-}
-
 export function SessionProvider({ children }: PropsWithChildren) {
-  const [user, isLoading, signInWithGoogle, signInWithPhone, signInWithApple] = useSignIn();
+  const {
+    user, 
+    isLoading, 
+    signInWithGoogle,  
+    logout 
+  } = useSignIn();
+
+  const signInMethods = {
+    google: signInWithGoogle,
+  };
   
   return (
     <AuthContext.Provider
       value={{
-        signIn: (method: string, value: string) => {
-          // Perform sign-in logic here
-          if (method === 'google') 
-            signInWithGoogle();
-          if (method === 'phone') 
-            signInWithPhone(value);
+        signIn: (method: keyof typeof signInMethods, value?: string) => {
+          // Perform sign-in logic here      
+          signInMethods[method]();
         },
         signOut: () => {
-          setSession(null);
+          logout();
         },
         user,
         isLoading,

@@ -1,49 +1,18 @@
-import { Image, StyleSheet } from 'react-native';
+import { StyleSheet } from 'react-native';
+import { Image } from '@/components/Image';
 import { HelloWave } from '@/components/HelloWave';
 import ParallaxScrollView from '@/components/ParallaxScrollView';
 import ParallaxViewHeader from '@/components/ParallaxViewHeader';
 import { useContext, useEffect, useState } from 'react';
 import { randomDishImageURL } from '@/util/randomDishImage';
-import RestaurantCard from '@/components/RestaurantCard';
 import { AuthContext } from '@/contexts/authCtx';
 import { Avatar } from '@rneui/themed';
-
-const restaurantsData = [
-  {
-    "name": "Pizza Express",
-    "description": "Authentic Italian pizza baked in a wood-fired oven.",
-    "deliveryPrice": 50,
-    "averageDeliveryTime": 30
-  },
-  {
-    "name": "Sushi Zen",
-    "description": "Delicious fresh sushi rolls and premium sashimi.",
-    "deliveryPrice": 70,
-    "averageDeliveryTime": 40
-  },
-  {
-    "name": "Tacos Locos",
-    "description": "Street tacos with an explosion of Mexican flavors.",
-    "deliveryPrice": 30,
-    "averageDeliveryTime": 25
-  },
-  {
-    "name": "Burger Mania",
-    "description": "Juicy gourmet burgers with fresh ingredients.",
-    "deliveryPrice": 60,
-    "averageDeliveryTime": 35
-  },
-  {
-    "name": "La Pasta Mía",
-    "description": "Handmade pasta with homemade sauces that will transport you to Italy.",
-    "deliveryPrice": 50,
-    "averageDeliveryTime": 45
-  }
-];
+import Business from '@/components/Business';
+import { ThemedView } from '@/components/ThemedView';
 
 export default function HomeScreen() {
   const [headerImage, setHeaderImage] = useState('');
-  const { user } = useContext(AuthContext);
+  const { user, signOut } = useContext(AuthContext);
 
   useEffect(() => {
     randomDishImageURL().then((imageURL) => {
@@ -62,24 +31,26 @@ export default function HomeScreen() {
       }
       headerContent={ 
         <ParallaxViewHeader 
-          title={'Your wish is my command'} 
-          subtitle={'Find your favorites'}
+          title={"🍔 Cravings? Consider them solved! 😋"} 
+          subtitle={"🔍 Discover Your Faves! 💖"}
           lightColor='white'
           darkColor='white'>
-            <Avatar size={32} source={{ uri: user?.photoURL }} rounded containerStyle={styles.avatar} />
+            <Avatar size={32} onPress={() => signOut()} source={{ uri: user?.photoURL }} rounded containerStyle={styles.avatar} />
         </ParallaxViewHeader>
       }
       >
-      {
-        restaurantsData.map((restaurant) => 
-          <RestaurantCard key={Math.random().toString()} {...restaurant} />
-        )
-      }
+      <ThemedView style={styles.container}>
+        <Business />
+      </ThemedView>
     </ParallaxScrollView>
   );
 }
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    gap: 16
+  },
   titleContainer: {
     flexDirection: 'row',
     alignItems: 'center',

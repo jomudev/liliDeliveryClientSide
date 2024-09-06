@@ -26,11 +26,9 @@
         <action android:name="android.intent.action.VIEW"/>
         <category android:name="android.intent.category.DEFAULT"/>
         <category android:name="android.intent.category.BROWSABLE"/>
-        <data android:scheme="myapp"/>
-        <data android:scheme="com.jomudev.delivery"/>
-        <data android:scheme="lilidelivery"/>
-        <data android:scheme="com.jomudev.deliveryClient"/>
-        <data android:scheme="exp+deliveryclient"/>
+        <data android:scheme="liliDeliveryCustomer"/>
+        <data android:scheme="com.jomudev.liliDeliveryCustomer"/>
+        <data android:scheme="exp+lilideliverycustomer"/>
       </intent-filter>
     </activity>
     <activity android:name="com.facebook.react.devsupport.DevSettingsActivity" android:exported="false"/>

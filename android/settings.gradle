@@ -44,7 +44,7 @@ if (getRNMinorVersion() >= 75) {
   }
 }
 
-rootProject.name = 'deliveryClient'
+rootProject.name = 'Lili´s Delivery'
 
 dependencyResolutionManagement {
   versionCatalogs {

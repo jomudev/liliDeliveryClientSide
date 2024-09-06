@@ -1,56 +1,56 @@
-import { randomDishImageURL } from "@/util/randomDishImage";
-import { ListItem, ThemeContext } from "@rneui/themed";
-import { useEffect, useState } from "react";
-import { StyleSheet, Image, Platform } from "react-native";
+import { StyleSheet, Pressable } from "react-native";
+import { Image } from '@/components/Image';
 import { ThemedText } from "./ThemedText";
 import BlurView from "@/components/BlurView";
-import { useColorScheme } from "@/hooks/useColorScheme";
 import { ThemedView } from "./ThemedView";
 import toCurrency from "@/util/toCurrency";
-import { FontAwesome6, Ionicons, MaterialIcons } from "@expo/vector-icons";
+import { MaterialIcons } from "@expo/vector-icons";
+import { Link } from "expo-router";
 
-export type RestaurantCardProps = {
+export type BusinessCardProps = {
+  id: number,
   name: string;
   description: string;
   averageDeliveryTime: number,
   deliveryPrice: number,
+  imageURL: string,
 };
 
-export default function RestaurantCard ({
+export default function BusinessCard ({
+  id,
   name,
   description,
   averageDeliveryTime,
   deliveryPrice,
-}: RestaurantCardProps) {
-  const [backgroundImage, setBackgroundImage] = useState('');
-  useEffect(() => {
-    randomDishImageURL().then(imageURL => {
-      setBackgroundImage(imageURL);
-    });
-  }, []);
+  imageURL,
+}: BusinessCardProps) {
+
   return (
-    <ThemedView style={styles.container}>
-      <Image src={backgroundImage} style={styles.backgroundImage}/>
-        <ThemedView style={styles.businessDescription}>
-          <ThemedText style={styles.businessName} type='title' lightColor="white" darkColor="white" >
-            { name }
+    <Link asChild href={`/businessCatalog/${id}`}>
+      <Pressable 
+        style={styles.container}>
+        <Image src={imageURL} style={styles.backgroundImage}/>
+          <ThemedView style={styles.businessDescription}>
+            <ThemedText style={styles.businessName} type='title' lightColor="white" darkColor="white" >
+              { name }
+            </ThemedText>
+            <ThemedText style={styles.businessSlogan} lightColor="white" darkColor="white" >
+              { description }
+            </ThemedText>
+          </ThemedView>
+        <BlurView intensity={60} tint={'dark'} style={[styles.businessDetails, styles.averageDeliveryTime]}>
+          <ThemedText style={styles.averageDeliveryTimeText} type={'defaultSemiBold'} lightColor="white" darkColor="white">
+            { averageDeliveryTime } min
           </ThemedText>
-          <ThemedText style={styles.businessSlogan} lightColor="white" darkColor="white" >
-            { description }
+          <MaterialIcons style={styles.deliveryTimeIcon} name={'delivery-dining'} size={28} color={"#fff"}/>
+        </BlurView>
+        <BlurView intensity={60} tint={'dark'} style={[styles.businessDetails, styles.deliveryPrice]}> 
+          <ThemedText style={styles.deliveryPriceText} type={'defaultSemiBold'} lightColor="white" darkColor="white">
+            { toCurrency(deliveryPrice) }
           </ThemedText>
-        </ThemedView>
-      <BlurView intensity={60} tint={'dark'} style={[styles.businessDetails, styles.averageDeliveryTime]}>
-        <ThemedText style={styles.averageDeliveryTimeText} type={'defaultSemiBold'} lightColor="white" darkColor="white">
-          { averageDeliveryTime } min
-        </ThemedText>
-        <MaterialIcons style={styles.deliveryTimeIcon} name={'delivery-dining'} size={28} color={"#fff"}/>
-      </BlurView>
-      <BlurView intensity={60} tint={'dark'} style={[styles.businessDetails, styles.deliveryPrice]}> 
-        <ThemedText style={styles.deliveryPriceText} type={'defaultSemiBold'} lightColor="white" darkColor="white">
-          { toCurrency(deliveryPrice) }
-        </ThemedText>
-      </BlurView>
-    </ThemedView>
+        </BlurView>
+      </Pressable>
+    </Link>
   );
 };
 

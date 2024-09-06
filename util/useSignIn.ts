@@ -1,113 +1,76 @@
-import * as WebBrowser  from 'expo-web-browser';
-import * as Google from 'expo-auth-session/providers/google';
 import { useEffect, useState } from 'react';
-import clientIdGetter from './clientIdManager';
-import { 
-  GoogleAuthProvider, 
-  onAuthStateChanged,
-  RecaptchaVerifier,
-  signInWithPhoneNumber, 
-  signInWithCredential 
-} from 'firebase/auth';
-import { auth, TUserData } from '@/apis/firebase';
+import { TUserData } from '@/apis/firebase';
+import auth from '@react-native-firebase/auth'
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import databaseAPI from '@/apis/databaseAPI';
-
-const api = databaseAPI();
+import { Alert, Platform } from 'react-native';
+import { GoogleSignin } from '@react-native-google-signin/google-signin';
+import clientIdGetter from './clientIdManager';
+import feedback from './feedback';
+const clientsId = clientIdGetter();
 
 export type TErrorMessage = {
   title: string,
   message: string,
 }
 
-WebBrowser.maybeCompleteAuthSession();
-
-const idClients = clientIdGetter();
-
-export function useLocalUser() {
-  const onGetLocalUser = async () => {  
-    try {
-      const userJSON = await AsyncStorage.getItem("@user");
-      return userJSON && JSON.parse(userJSON);
-    } catch(e) {
-      console.error(new Error("Error trying to access local user data"));
-    }
-  }
-
-  const handleSaveLocalUser = async (user: TUserData) => {
-    await AsyncStorage.setItem("@user", JSON.stringify(user));
-  }
-
-  return [onGetLocalUser, handleSaveLocalUser];
-};
+let googleCredential;
 
 export default function useSignIn () {
-  const [onGetLocalUser, handleSaveLocalUser] = useLocalUser();
-  const [user, setUser] = useState<TUserData>(null);
+  const [user, setUser] = useState<TUserData | null>(null);
   const [isLoading, setIsLoading] = useState<Boolean>(true);
-
-  const [request, response, promptAsync] = Google.useAuthRequest({
-    iosClientId: idClients.iosClientId,
-    androidClientId: idClients.androidClientId,
-  });
+  const [isGoogleConfigured, setIsGoogleConfigured] = useState(false);
 
   useEffect(() => {
-    if ( response?.type == 'success' ) {
-      const { id_token } = response.params;
-      const credential = GoogleAuthProvider.credential(id_token);
-      signInWithCredential(auth, credential);
-    }
-  }, [response]);
-
-  useEffect(() => {
-    onGetLocalUser().then(async (localUser) => {
-      if (localUser) {
-        //setUser(localUser);
-        //await api.createUser(localUser);
-      }
-    }).catch((err) => {
-      console.warn(err);
+    GoogleSignin.configure({
+      webClientId: clientsId.clientId,
     });
-
-    const unsubscribe = onAuthStateChanged(auth, async (userInfo) => {
-      setIsLoading(false);
-      if (user) return;
-      if (userInfo) {
-        setUser(userInfo);
-        handleSaveLocalUser(userInfo);
-        await api.createUser(userInfo);
-      }
-    });
-    return () => unsubscribe();
+    setIsGoogleConfigured(true);
+    console.log("waiting for auth state change...");
+    const unsubscribe = auth().onAuthStateChanged((authUser: TUserData | null) => {
+      setUser(authUser);
+      console.info(`auth state change: setting cloud user in ${Platform.OS}: ${JSON.stringify(authUser?.email, null, 2)}`);
+      if (isLoading) setIsLoading(false);
+      if (authUser) databaseAPI().createUser(authUser);
+    })
+    return unsubscribe;
   }, []);
 
   const signInWithGoogle = async () => {
-    await promptAsync();
+    if (!isGoogleConfigured) {
+      feedback("Google Sign-in is not configured yet, contact the app Owner");
+      return;
+    }
+    try {
+      setIsLoading(true);
+      await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
+      const { idToken } = await GoogleSignin.signIn();
+      googleCredential = auth.GoogleAuthProvider.credential(idToken);
+      const authUser = await auth().signInWithCredential(googleCredential);
+      setUser(authUser.user);
+      setIsLoading(false);
+    } catch (err: any) {
+      if (err.code == -5) return;
+      feedback(`🤔 Something weird is happening here, please contact for support...`);
+      console.error(`Google Sign-in ${err}`);
+    }
   }
 
   const signInWithApple = async () => {
-
+    feedback('sign-in with apple');
   }
 
-  const signInWithPhone = async (phoneNumber: string) => {
-    console.info('signin with phone');
-    const recaptchaVerifier = new RecaptchaVerifier(auth, 'sign-in-button', {
-      'size': 'invisible',
-      'callback': async (response) => {
-        // reCAPTCHA solved, allow signInWithPhoneNumber.
-        // ...
-        await signInWithPhoneNumber(auth, phoneNumber, recaptchaVerifier)
-      },
-      'expired-callback': async () => {
-        // Response expired. Ask user to solve reCAPTCHA again.
-        // ...
-        await signInWithPhone(phoneNumber);
-      }
-    });
+  const logout = () => {
+    try {
+      auth().signOut();
+      setUser(null);
+    } catch (err: any) {
+      console.error(`Error trying to signOut: ${err}`);
+    }
   }
 
-  return [ user, isLoading, signInWithGoogle, signInWithPhone, signInWithApple ];
-};
+  return { user, isLoading, signInWithGoogle, signInWithApple, logout };
+};  
 
 /**
  * 

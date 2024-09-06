@@ -15,7 +15,7 @@ export default function ParallaxViewHeader ({ title, subtitle, ...otherProps }: 
       <BlurView intensity={30} tint={'dark'} style={styles.headerTitles}>
         { title && (
           <ThemedText 
-            type='subtitle' 
+            type='defaultSemiBold'
             darkColor={otherProps.darkColor}
             lightColor={otherProps.lightColor}
             > 

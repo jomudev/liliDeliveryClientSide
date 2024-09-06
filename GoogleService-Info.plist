@@ -3,9 +3,9 @@
 <plist version="1.0">
 <dict>
 	<key>CLIENT_ID</key>
-	<string>621584861964-hon4kicrrke286asbur0qqccat3jeum8.apps.googleusercontent.com</string>
+	<string>621584861964-g2fmksvvlr3kgh4ui7rm3pcih8pr5rmd.apps.googleusercontent.com</string>
 	<key>REVERSED_CLIENT_ID</key>
-	<string>com.googleusercontent.apps.621584861964-hon4kicrrke286asbur0qqccat3jeum8</string>
+	<string>com.googleusercontent.apps.621584861964-g2fmksvvlr3kgh4ui7rm3pcih8pr5rmd</string>
 	<key>ANDROID_CLIENT_ID</key>
 	<string>621584861964-5kjp01ou3pvrm7rpvh394ars96nbmgcs.apps.googleusercontent.com</string>
 	<key>API_KEY</key>
@@ -15,7 +15,7 @@
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>com.jomudev.delivery</string>
+	<string>com.jomudev.liliDeliveryCustomer</string>
 	<key>PROJECT_ID</key>
 	<string>lilideliverytesting</string>
 	<key>STORAGE_BUCKET</key>
@@ -31,6 +31,6 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:621584861964:ios:0ee340abfbae0175381729</string>
+	<string>1:621584861964:ios:e1676f42db421767381729</string>
 </dict>
 </plist>
