@@ -7,6 +7,7 @@ import CenteredText from "./CenteredText";
 
 export default function Business() {
   const { business, isLoading } = useContext(BusinessContext);
+  console.log(business)
   if (isLoading) {
     return <LoadingIndicator />
   }

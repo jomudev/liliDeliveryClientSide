@@ -39,14 +39,13 @@ export default function businessCatalog() {
       headerContent={ 
         <ParallaxViewHeader 
           title={`🏬 ${businessInfo.name}`} 
-          subtitle={`✨ ${businessInfo.description}`}
+          subtitle={Boolean(businessInfo.description) ? `✨ ${businessInfo.description}` : ''}
           lightColor='white'
           darkColor='white'
           />
       }
       >
         <ThemedView style={styles.container}>
-          <ThemedText> {businessInfo.name}'s Catalog goes here</ThemedText>
           <Catalog businessId={businessId} />
         </ThemedView>
     </ParallaxScrollView>

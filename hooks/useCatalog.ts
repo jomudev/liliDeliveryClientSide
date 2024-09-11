@@ -1,21 +1,34 @@
 import databaseAPI from "@/apis/databaseAPI";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+
+export type TProduct = {
+  id: number,
+  category: string,
+  categoryId: number,
+  name: string,
+  imageURL: string,
+  price: number,
+}
+
+export type TCatalog = {
+  [index: string]: TProduct[];
+}
 
 export function useCatalog(businessId: string) {
   const [catalog, setCatalog] = useState({});
+  const ids = useRef<{[index: string]: number}>({});
   const [isLoading, setIsLoading] = useState(true);
   useEffect(() => {
     (async function () {
-      const categories = await databaseAPI().getBusinessCategories(businessId) || [];
-      categories.forEach(async (category) => {
-        let categoryProducts = await databaseAPI().getCategoryProducts(category.id, businessId);
-        setCatalog((prev) => {
-          if (!categoryProducts && !categoryProducts?.length) return prev;
-          return { ...prev, [category.name]: categoryProducts };
-        });
+      let preparedCatalog: TCatalog = {};
+      const products = await databaseAPI().getBusinessProducts(businessId) || [];
+      products.forEach((product: TProduct) => {
+        preparedCatalog[product.category] = preparedCatalog[product.category] ? preparedCatalog[product.category].concat(product) : [product];
+        ids.current[product.category] = product.categoryId; 
       });
+      setCatalog(preparedCatalog);
       if (isLoading) setIsLoading(false);
     })();
   }, []);
-  return { catalog, isLoading };
+  return { catalog, categoryId: ids.current, isLoading };
 }

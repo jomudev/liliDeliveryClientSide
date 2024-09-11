@@ -1,12 +1,11 @@
-import { Platform } from "react-native";
 import { TUserData } from "./firebase";
+import { Platform } from "react-native";
 import feedback from "@/util/feedback";
 
+let domain;
+domain = Platform.OS == 'android' ? "http://10.0.2.2:3000" : "http://127.0.0.1:3000";
 
-if (process.env.NODE_ENV !== 'production') {
-  domain = "https://delivery-test-backend.vercel.app";
-}
-let domain = Platform.OS == 'android' ? "http://10.0.2.2:3000" : "http://127.0.0.1:3000";
+//domain = "https://delivery-test-backend.vercel.app";
 
 const apiURL = domain;
 
@@ -30,7 +29,7 @@ export async function apiFetch(pathName: string, options?: RequestInit) {
     console.info(`response for ${route}: \n${JSON.stringify(apiResponse, null, 2)}`);
     return apiResponse;
   } catch (err) {
-    throw err.message;
+    throw err;
   }
 };
 
@@ -46,7 +45,7 @@ export default function () {
           }),
         });
       } catch (err) {
-        feedback(`😨Error trying to create the user: ${err.message}`)
+        feedback(`😨Error trying to create the user: ${err}`)
         return null;
       }
     },  
@@ -54,7 +53,7 @@ export default function () {
       try {
         return await apiFetch('/api/business');
       } catch (err) {
-        feedback(`😨Error trying to get database business: ${err.message}`);
+        feedback(`😨 Connection error, check your internet connection`);
         return [];
       }
     },
@@ -63,7 +62,7 @@ export default function () {
       try {
         return await apiFetch(`/api/business/${businessId}`);
       } catch (err) {
-        feedback(`😨Error trying to get database business info: ${err}`);
+        feedback(`😨 Connection error, check your internet connection`);
         return null;
       }
     },
@@ -85,6 +84,15 @@ export default function () {
         });
       } catch (err) {
         feedback(`😨Error trying to get database category products: ${err}`);
+        return [];
+      }
+    },
+
+    async getBusinessProducts(businessId: string) {
+      try {
+        return await apiFetch(`/api/products/${businessId}`);
+      } catch(e) {
+        feedback(`Check your network signal...`, e);
         return [];
       }
     }
