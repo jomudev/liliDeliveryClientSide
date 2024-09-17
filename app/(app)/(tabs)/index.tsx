@@ -21,7 +21,7 @@ export default function HomeScreen() {
   }, []);
 
   return (
-    <ParallaxScrollView
+    <ParallaxScrollView 
       headerBackgroundColor={{ light: '#FFE37E', dark: '#FF7D70' }}
       headerImage={
         <Image 

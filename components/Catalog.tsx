@@ -4,7 +4,6 @@ import { ThemedView } from "./ThemedView";
 import Category from "./Category";
 import { ScrollView } from "react-native";
 import { ThemedText } from "./ThemedText";
-import { Link } from "expo-router";
 
 export type CatalogProps = {
   businessId: string,
@@ -15,12 +14,11 @@ export default function Catalog ({ businessId}: CatalogProps) {
   if (isLoading) return <LoadingIndicator />
   return (
     <ThemedView>
-      <Link href='/(app)/(tabs)'><ThemedText> {'<'} Back to business </ThemedText></Link>
       <ScrollView style={{ flexDirection: 'row', marginBottom: 24}} horizontal>
         {
-          Object.keys(catalog).map((categoryName) => (
+          Object.keys(catalog).length > 1 ? Object.keys(catalog).map((categoryName) => (
             <ThemedText>{ categoryName }</ThemedText>
-          ))
+          )) : <ThemedText> 😨 No Products Here </ThemedText>
         }
       </ScrollView>
       {

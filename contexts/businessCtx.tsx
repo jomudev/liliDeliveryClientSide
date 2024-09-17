@@ -1,5 +1,5 @@
 import databaseAPI from "@/apis/databaseAPI";
-import { createContext, ReactElement, useContext, useEffect, useState } from "react";
+import { createContext, PropsWithChildren, ReactElement, useContext, useEffect, useState } from "react";
 
 export type TBusiness = {
   id: number,
@@ -11,10 +11,10 @@ export type TBusiness = {
 };
 
 export const BusinessContext = createContext<{
-  business: TBusiness[] | null,
+  business: TBusiness[],
   isLoading: boolean
 }>({
-  business: null,
+  business: [],
   isLoading: false,
 });
 
@@ -27,7 +27,7 @@ export function useBusiness() {
   useEffect(() => {
     (async function () {
       if (business.length > 0) return;
-      DBbusiness = (await databaseAPI().getBusiness())
+      DBbusiness = (await databaseAPI().getBusiness()) || [];
       setBusiness(DBbusiness);
       setIsLoading(false);
     })();
@@ -35,7 +35,7 @@ export function useBusiness() {
   return { business, isLoading};
 }
 
-export function BusinessProvider({ children }: { children: ReactElement}) {
+export function BusinessProvider({ children }: PropsWithChildren) {
   const {business, isLoading} = useBusiness();
   return (
     <BusinessContext.Provider

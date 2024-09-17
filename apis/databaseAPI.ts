@@ -1,6 +1,8 @@
 import { TUserData } from "./firebase";
 import { Platform } from "react-native";
 import feedback from "@/util/feedback";
+import { TProduct } from "@/hooks/useCatalog";
+import { TBusiness } from "@/contexts/businessCtx";
 
 let domain;
 domain = Platform.OS == 'android' ? "http://10.0.2.2:3000" : "http://127.0.0.1:3000";
@@ -11,7 +13,7 @@ const apiURL = domain;
 
 let route : string;
 let apiResponse: Object;
-export async function apiFetch(pathName: string, options?: RequestInit) {
+export async function apiFetch<T>(pathName: string, options?: RequestInit): Promise<T | null> {
   if (pathName[0] !== "/") {
     pathName = "/" + pathName;
   }
@@ -27,7 +29,7 @@ export async function apiFetch(pathName: string, options?: RequestInit) {
       },
     })).json();
     console.info(`response for ${route}: \n${JSON.stringify(apiResponse, null, 2)}`);
-    return apiResponse;
+    return apiResponse || null;
   } catch (err) {
     throw err;
   }
@@ -49,18 +51,18 @@ export default function () {
         return null;
       }
     },  
-    async getBusiness() {
+    async getBusiness(): Promise<TBusiness[] | null> {
       try {
-        return await apiFetch('/api/business');
+        return (await apiFetch<TBusiness>('/api/business')) || [];
       } catch (err) {
         feedback(`😨 Connection error, check your internet connection`);
         return [];
       }
     },
 
-    async getBusinessInfo(businessId: number) {
+    async getBusinessInfo(businessId: number): Promise<TBusiness | null> {
       try {
-        return await apiFetch(`/api/business/${businessId}`);
+        return await apiFetch<TBusiness>(`/api/business/${businessId}`);
       } catch (err) {
         feedback(`😨 Connection error, check your internet connection`);
         return null;
@@ -88,9 +90,10 @@ export default function () {
       }
     },
 
-    async getBusinessProducts(businessId: string) {
+    async getBusinessProducts(businessId: string): Promise<TProduct[]> {
       try {
-        return await apiFetch(`/api/products/${businessId}`);
+        const apiResponseProducts = await apiFetch<TProduct[]>(`/api/products/${businessId}`);
+        return apiResponseProducts;
       } catch(e) {
         feedback(`Check your network signal...`, e);
         return [];

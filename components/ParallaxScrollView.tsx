@@ -1,5 +1,5 @@
 import type { PropsWithChildren, ReactElement } from 'react';
-import { StyleSheet, useColorScheme } from 'react-native';
+import { Pressable, StyleSheet, useColorScheme } from 'react-native';
 import Animated, {
   interpolate,
   useAnimatedRef,
@@ -8,6 +8,10 @@ import Animated, {
 } from 'react-native-reanimated';
 
 import { ThemedView } from '@/components/ThemedView';
+import { Icon } from '@rneui/themed';
+import { Colors } from '@/constants/Colors';
+import { useNavigation } from 'expo-router';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const HEADER_HEIGHT = 250;
 
@@ -15,6 +19,7 @@ type Props = PropsWithChildren<{
   headerImage: ReactElement;
   headerBackgroundColor: { dark: string; light: string };
   headerContent?: ReactElement;
+  showBackButton: boolean,
 }>;
 
 export default function ParallaxScrollView({
@@ -22,10 +27,12 @@ export default function ParallaxScrollView({
   headerImage,
   headerContent,
   headerBackgroundColor,
+  showBackButton,
 }: Props) {
   const colorScheme = useColorScheme() ?? 'light';
   const scrollRef = useAnimatedRef<Animated.ScrollView>();
   const scrollOffset = useScrollViewOffset(scrollRef);
+  const navigation = useNavigation();
 
   const headerAnimatedStyle = useAnimatedStyle(() => {
     return {
@@ -55,8 +62,17 @@ export default function ParallaxScrollView({
           ]}>
           {headerImage}
           {headerContent}
+          {
+            showBackButton && (
+            <Pressable onPress={() => navigation.goBack()} style={styles.goBackButton}>
+              <Icon name="arrow-back-outline" type={'ionicon'} color={Colors[colorScheme].icon} />
+            </Pressable>
+            )
+          }
         </Animated.View>
-        <ThemedView style={styles.content}>{children}</ThemedView>
+        <ThemedView style={styles.content}>
+          {children}
+        </ThemedView>
       </Animated.ScrollView>
     </ThemedView>
   );
@@ -76,4 +92,9 @@ const styles = StyleSheet.create({
     gap: 16,
     overflow: 'hidden',
   },
+  goBackButton: {
+    position: 'absolute',
+    top: 50,
+    left: 16,
+  }
 });

@@ -2,20 +2,18 @@ import databaseAPI from "@/apis/databaseAPI";
 import LoadingIndicator from "@/components/LoadingIndicator";
 import ParallaxScrollView from "@/components/ParallaxScrollView";
 import ParallaxViewHeader from "@/components/ParallaxViewHeader";
-import { ThemedText } from "@/components/ThemedText";
 import { TBusiness } from "@/contexts/businessCtx";
-import { router, useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
-import { Pressable, StyleSheet } from "react-native";
+import { StyleSheet } from "react-native";
 import { Image } from "@/components/Image";
 import Catalog from "@/components/Catalog";
 import { ThemedView } from "@/components/ThemedView";
 
-export function useBusinessInfo(businessId: string) {
+export function useBusinessInfo(businessId: number) {
   const [businessInfo, setBusinessInfo] = useState<TBusiness | null>();
   useEffect(() => {
     (async function () {
-      console.log(`requesting business "${businessId}" info`)
       const apiResponse = await databaseAPI().getBusinessInfo(businessId);
       setBusinessInfo(apiResponse);
     })();
@@ -24,11 +22,13 @@ export function useBusinessInfo(businessId: string) {
 }
 
 export default function businessCatalog() {
-  const { businessId } = useLocalSearchParams();
-  const businessInfo = useBusinessInfo(businessId);
+  const { businessId }: { businessId: string } = useLocalSearchParams();
+  const businessInfo = useBusinessInfo(parseInt(businessId));
+
   if (!businessInfo) return <LoadingIndicator />;
   return (
     <ParallaxScrollView
+      showBackButton
       headerBackgroundColor={{ light: '#FFE37E', dark: '#FF7D70' }}
       headerImage={
         <Image 

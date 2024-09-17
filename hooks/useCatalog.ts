@@ -5,9 +5,11 @@ export type TProduct = {
   id: number,
   category: string,
   categoryId: number,
+  description: string,
   name: string,
   imageURL: string,
   price: number,
+  branchId: number,
 }
 
 export type TCatalog = {

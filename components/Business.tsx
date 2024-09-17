@@ -11,7 +11,7 @@ export default function Business() {
   if (isLoading) {
     return <LoadingIndicator />
   }
-  if (!business) return <CenteredText>Nothing to show here</CenteredText>;
+  if (!business) return <CenteredText>❌🏬 There's no business here</CenteredText>;
   return business && business.map((business: TBusiness) => (
     <BusinessCard 
       key={business.id} 

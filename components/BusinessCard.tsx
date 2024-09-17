@@ -11,6 +11,7 @@ export type BusinessCardProps = {
   id: number,
   name: string;
   description: string;
+  businessId: number;
   averageDeliveryTime: number,
   deliveryPrice: number,
   imageURL: string,
@@ -18,6 +19,7 @@ export type BusinessCardProps = {
 
 export default function BusinessCard ({
   id,
+  businessId,
   name,
   description,
   averageDeliveryTime,

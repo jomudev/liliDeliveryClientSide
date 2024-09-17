@@ -1,29 +1,36 @@
-import { Pressable, StyleSheet } from "react-native";
-import { Card } from "@rneui/themed";
+import { Pressable, StyleSheet, View } from "react-native";
 import { ThemedView } from "./ThemedView";
 import { Image } from "./Image";
 import { ThemedText } from "./ThemedText";
 import toCurrency from "@/util/toCurrency";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import BlurView from "./BlurView";
-import { Colors } from "@/constants/Colors";
+import { TOrderProduct } from "@/hooks/useOrders";
+import { TProduct } from "@/hooks/useCatalog";
 
 export type ProductProps = {
+  id: number,
   name: string;
   description: string;
   price: number;
   imageURL: string;
+  handleAddToCart: (product: TProduct) => void;
 };
 
-export default function Product({ name, price, description, imageURL }: ProductProps) {
+export default function Product({  name, price, description, imageURL, handleAddToCart }: ProductProps) {
+
   return (
     <ThemedView style={styles.container}>
       <Image src={imageURL} style={styles.productImage}/>
       <ThemedView style={styles.productContent}>
-        <ThemedText style={styles.productName}> { name } </ThemedText>
         <BlurView style={styles.productFooter}>
-          <ThemedText type='defaultSemiBold'> { toCurrency(price) } </ThemedText>
-          <Pressable style={styles.addToCartButton}>
+          <ThemedText style={styles.productName}> 
+            <ThemedText type='defaultSemiBold'> { toCurrency(price) } </ThemedText>
+            | { name } 
+          </ThemedText>
+          <Pressable onPress={ () => {
+            handleAddToCart();
+          }} style={styles.addToCartButton} >
             <MaterialCommunityIcons name='cart-outline' size={24} color={'white'} />
           </Pressable>
         </BlurView>
@@ -56,13 +63,7 @@ const styles = StyleSheet.create({
     padding: 8,
   },
   productName: {
-    textShadowColor: 'black',
-    textShadowOffset: {
-      width: -2,
-      height: 2,
-    },
-    textShadowRadius: 8,
-    paddingVertical: 6
+    paddingVertical: 6,
   },
   productFooter: {
     position: 'absolute',
