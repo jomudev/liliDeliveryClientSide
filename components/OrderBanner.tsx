@@ -1,33 +1,62 @@
-import { useContext } from "react";
 import BlurView from "./BlurView";
-import { OrderContext } from "@/contexts/orderCtx";
 import { useColorScheme } from "@/hooks/useColorScheme";
-import { Platform, StyleSheet, View } from "react-native";
+import { Platform, Pressable, StyleSheet, View } from "react-native";
 import { ThemedText } from "./ThemedText";
 import { Link, usePathname } from "expo-router";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import { TOrderProduct } from "@/hooks/useOrders";
+import { useState } from "react";
 
-export default function OrderBanner () {
-  const { order } = useContext(OrderContext);
+export type OrderBannerProps = {
+  order: TOrderProduct[],
+}
+
+export default function OrderBanner ({ order }: OrderBannerProps) {
+  const [ showBanner, setShowBanner ] = useState(true);
   const pathname = usePathname();
   const theme = useColorScheme() ?? 'light';
   if (pathname == '/orders') return null;
   if (order.length == 0) return null;
+  if (!showBanner) {
+    return (
+      <View style={styles.container}>
+        <BlurView 
+          tint={theme == 'light' ? 'dark' : 'light'} 
+          style={[styles.banner, { 
+            width: 72, 
+            height: 72, 
+            justifyContent: 'center', 
+            left: 20
+          }]}
+          >
+          <Pressable onPress={() => setShowBanner(true) }>
+            <Ionicons name='chevron-forward' color={'white'} size={24} />
+          </Pressable>
+        </BlurView>
+      </View>
+    )
+  }
   return (
     <View style={styles.container}>
-      <Link asChild href={'/(app)/(tabs)/orders'}>
         <BlurView tint={theme == 'light' ? 'dark' : 'light'} style={styles.banner}>
-            <ThemedText darkColor="white" lightColor="white"> 
-              You have a pending order 
-            </ThemedText>
-            <Link style={styles.viewCartButton} href={'/(app)/(tabs)/orders'} >
+            <Pressable 
+              style={{ flexDirection: 'row', alignItems: 'center'}} 
+              onPress={() => setShowBanner(false) }
+              >
+              <Ionicons name='chevron-back' color={'white'} size={24} />
               <ThemedText darkColor="white" lightColor="white"> 
-                View Cart
+                You have a pending order 
               </ThemedText>
-              <MaterialCommunityIcons name='cart-outline' size={24} color={'white'} style={{ textAlign: 'center', textAlignVertical: 'center'}} />
+            </Pressable>
+            <Link style={styles.viewCartButton} href={'/(app)/(tabs)/orders'} >
+              <ThemedText style={{ textAlignVertical: 'center'}}>
+                <ThemedText darkColor="white" lightColor="white"> 
+                  View Cart
+                </ThemedText>
+                <MaterialCommunityIcons name='cart-outline' size={16} color={'white'} />
+              </ThemedText>
             </Link>
           </BlurView>
-      </Link>
     </View>
   );
 }

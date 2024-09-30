@@ -10,6 +10,7 @@ export type TProduct = {
   imageURL: string,
   price: number,
   branchId: number,
+  businessId: number,
 }
 
 export type TCatalog = {

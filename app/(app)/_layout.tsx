@@ -28,6 +28,7 @@ export default function HomeLayout() {
     <ContextProviders>
       <Stack>
         <Stack.Screen name='(tabs)' options={{ headerShown: false }} />
+        <Stack.Screen name='addAddress' options={{ headerTitle: 'Add Address', headerBackTitle: 'Back' }} />
       </Stack>
     </ContextProviders>
   );

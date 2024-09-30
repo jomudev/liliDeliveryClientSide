@@ -1,7 +1,6 @@
-import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { StyleSheet, Image, Pressable } from 'react-native';
+import { StyleSheet, Image } from 'react-native';
 import { GoogleSigninButton } from '@react-native-google-signin/google-signin';
 import { AuthContext } from "@/contexts/authCtx";
 import React, { useContext } from "react";
@@ -40,7 +39,6 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-
   },
   logo: {
     width: 200,

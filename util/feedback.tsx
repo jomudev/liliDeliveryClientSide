@@ -1,7 +1,6 @@
 import { Alert, Platform, ToastAndroid } from "react-native";
 
-export default function feedback (message: string, logMessage?: any) {
-  console.info(message, logMessage ?? logMessage);
+export default function feedback (message: string) {
   if (Platform.OS == "android") {
     ToastAndroid.show(message, ToastAndroid.LONG);
     return;

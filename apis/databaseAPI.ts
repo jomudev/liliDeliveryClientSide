@@ -7,12 +7,13 @@ import { TBusiness } from "@/contexts/businessCtx";
 let domain;
 domain = Platform.OS == 'android' ? "http://10.0.2.2:3000" : "http://127.0.0.1:3000";
 
+
 //domain = "https://delivery-test-backend.vercel.app";
 
 const apiURL = domain;
 
 let route : string;
-let apiResponse: Object;
+let apiResponse: any;
 export async function apiFetch<T>(pathName: string, options?: RequestInit): Promise<T | null> {
   if (pathName[0] !== "/") {
     pathName = "/" + pathName;
@@ -25,12 +26,16 @@ export async function apiFetch<T>(pathName: string, options?: RequestInit): Prom
       ...options,
       headers: {
         Accept: 'application/json',
-        'Content-Type': 'application/json',
+        "Content-Type": 'application/json',
       },
     })).json();
+    if (Object.hasOwn(apiResponse, 'errorMessage')) {
+      throw new Error(apiResponse.errorMessage, { cause: apiResponse.errorMessage });
+    }
     console.info(`response for ${route}: \n${JSON.stringify(apiResponse, null, 2)}`);
     return apiResponse || null;
   } catch (err) {
+    console.error(`response for ${route}: \n${err}`);
     throw err;
   }
 };
@@ -47,7 +52,7 @@ export default function () {
           }),
         });
       } catch (err) {
-        feedback(`😨Error trying to create the user: ${err}`)
+        //feedback(`😨 Error trying to create the user: ${err}`)
         return null;
       }
     },  
@@ -97,6 +102,17 @@ export default function () {
       } catch(e) {
         feedback(`Check your network signal...`, e);
         return [];
+      }
+    },
+
+    async savePendingOrder(order: TOrder) {
+      try {
+        const apiResponse = await apiFetch('orders/createOrder');
+        if (Object.hasOwn(apiResponse, 'errorMessage')) {
+          throw new Error('an error has ocurred' + piResponse.errorMessage);
+        }
+      } catch (err) {
+        console.log('api error', err);        
       }
     }
   }

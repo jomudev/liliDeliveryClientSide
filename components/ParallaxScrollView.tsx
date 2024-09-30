@@ -11,7 +11,7 @@ import { ThemedView } from '@/components/ThemedView';
 import { Icon } from '@rneui/themed';
 import { Colors } from '@/constants/Colors';
 import { useNavigation } from 'expo-router';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import BlurView from './BlurView';
 
 const HEADER_HEIGHT = 250;
 
@@ -64,9 +64,11 @@ export default function ParallaxScrollView({
           {headerContent}
           {
             showBackButton && (
-            <Pressable onPress={() => navigation.goBack()} style={styles.goBackButton}>
-              <Icon name="arrow-back-outline" type={'ionicon'} color={Colors[colorScheme].icon} />
-            </Pressable>
+            <BlurView style={styles.goBackButton}>
+              <Pressable onPress={() => navigation.goBack()}>
+                <Icon name="arrow-back-outline" type={'ionicon'} color={Colors[colorScheme].text} />
+              </Pressable>
+            </BlurView>
             )
           }
         </Animated.View>
@@ -96,5 +98,9 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 50,
     left: 16,
+    borderRadius: 50,
+    overflow: 'hidden',
+    elevation: 16,
+    padding: 16,
   }
 });

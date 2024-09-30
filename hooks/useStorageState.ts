@@ -22,7 +22,7 @@ export async function setStorageItemAsync(key: string, value: string | null) {
 
 export function useStorageState(key: string): UseStateHook<string> {
   // Public
-  const [state, setState] = useAsyncState<string>();
+  const [state, setState] = useAsyncState<string>([true, null]);
 
   // Get
   React.useEffect(() => {

@@ -15,9 +15,17 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.jomudev.liliDeliveryCustomer",
-      "googleServicesFile": "./GoogleService-Info.plist"
+      "googleServicesFile": "./GoogleService-Info.plist",
+      "config": {
+        "googleMapsApiKey": "AIzaSyA3YfjzBEYm4naIr9tEySbD2gnYWX5OmBU"
+      }
     },
     "android": {
+      "config": {
+        "googleMaps": {
+          "apiKey": "AIzaSyDgtyMSNRWp5gDwBDuLJAEFe1v_oUtI4e8",
+        }
+      },
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
@@ -43,6 +51,12 @@
           "android": {
             "usesCleartextTraffic": true
           }
+        }
+      ],
+      [
+        "@stripe/stripe-react-native",
+        {
+          "enableGooglePay": true
         }
       ],
       [

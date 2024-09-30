@@ -1,5 +1,6 @@
 import feedback from "@/util/feedback";
 import { useEffect, useReducer, useRef, useState } from "react";
+import { Alert } from "react-native";
 
 export type TOrderProduct = {
   id: number,
@@ -12,10 +13,25 @@ export type TOrderProduct = {
   quantity: number,
 }
 
+export type TProductComplement = {
+  productId: number;
+  name: string,
+  description: string,
+  price: string,
+}
+
+export type TOrder = {
+  product: TOrderProduct[],
+  productComplements: TProductComplement[],
+  total: number,
+
+}
+
 export const ORDER_ACTION_TYPES = {
   ADD_ORDER: 'add',
   REMOVE_ORDER: 'remove',
   MODIFY_ORDER: 'modify',
+  CLEAR: 'clear',
 };
 
 function orderReducer (order: TOrderProduct[], action: { type: string, data: any}) {
@@ -30,6 +46,11 @@ function orderReducer (order: TOrderProduct[], action: { type: string, data: any
   }
   if (action.type == ORDER_ACTION_TYPES.MODIFY_ORDER) {
     newOrder = order.map((product) => product.id == action.data.id ? action.data : product);
+    return newOrder; 
+  }
+  if (action.type == ORDER_ACTION_TYPES.CLEAR) {
+    newOrder = [];
+    return newOrder;
   }
   return order;
 }
@@ -41,13 +62,35 @@ export default function useOrder() {
   const [order, dispatch] = useReducer(orderReducer, []);
   const [subtotal, setSubtotal] = useState(0);
 
+  function clearOrder() {
+    dispatch({
+      type: ORDER_ACTION_TYPES.CLEAR,
+      data: null,
+    });
+    businessOrder.current = null;
+  }
+
   function addProductToOrder(product: TOrderProduct) {
-    console.log('order product', product);
     if (!businessOrder.current) businessOrder.current = product.branchId;
     if (!businessOrder.current) return;
     if (businessOrder.current != product.branchId) {
-      feedback('You have an order from another business');
-      return;
+      let userSelectNo: boolean = false;
+      Alert.alert('Clear Cart?', 'You have an order from another business, did you want to clear the cart?', [
+        {
+          text: 'Yes, clear the cart',
+          onPress: () => {
+            clearOrder();
+
+          },
+        },
+        {
+          text: 'No',
+          onPress: () => {
+            userSelectNo = true;
+          }
+        }
+      ]);
+      if (userSelectNo) return;
     };
     
     if (order.find((prod: TOrderProduct) => prod.id == product.id)) 
@@ -77,13 +120,13 @@ export default function useOrder() {
 
   useEffect(() => {
     orderSubtotal = order.reduce((prev, current) => prev + (current.price * current.quantity), 0);
-    console.log('new subtotal', orderSubtotal);
     setSubtotal(orderSubtotal);
   }, [order]);
 
   return { 
     order, 
     orderSubtotal: subtotal, 
+    clearOrder,
     addProductToOrder, 
     removeProductFromOrder, 
     modifyOrderProduct 

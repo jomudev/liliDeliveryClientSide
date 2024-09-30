@@ -33,6 +33,15 @@ export default function TabLayout() {
           ),
         }}
       />
+      <Tabs.Screen
+        name="addresses"
+        options={{
+          title: 'My Addresses',
+          tabBarIcon: ({ color, focused }) => (
+            <TabBarIcon name={focused ? 'map' : 'map-outline'} color={color} />
+          ),
+        }}
+      />
     </Tabs>
   );
 }

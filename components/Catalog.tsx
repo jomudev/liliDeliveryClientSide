@@ -16,9 +16,9 @@ export default function Catalog ({ businessId}: CatalogProps) {
     <ThemedView>
       <ScrollView style={{ flexDirection: 'row', marginBottom: 24}} horizontal>
         {
-          Object.keys(catalog).length > 1 ? Object.keys(catalog).map((categoryName) => (
+          Object.keys(catalog).length > 1 && Object.keys(catalog).map((categoryName) => (
             <ThemedText>{ categoryName }</ThemedText>
-          )) : <ThemedText> 😨 No Products Here </ThemedText>
+          ))
         }
       </ScrollView>
       {
@@ -27,6 +27,9 @@ export default function Catalog ({ businessId}: CatalogProps) {
             <Category name={category} products={catalog[category]}/>
           </ThemedView>
         ))
+      }
+      {
+        !Boolean(Object.keys(catalog).length) && <ThemedText> 😨 No Products Here </ThemedText>
       }
      </ThemedView>
     )

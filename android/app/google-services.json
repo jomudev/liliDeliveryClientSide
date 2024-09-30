@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "621584861964",
+    "project_id": "lilideliverytesting",
+    "storage_bucket": "lilideliverytesting.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:621584861964:android:9db414b883fdb7a9381729",
+        "android_client_info": {
+          "package_name": "com.jomudev.liliDeliveryCustomer"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "621584861964-flmeu4g4mruh550sssor25dlp4a9dmr3.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.jomudev.liliDeliveryCustomer",
+            "certificate_hash": "4f042f1aba76a701123ed8474042e42df8b103de"
+          }
+        },
+        {
+          "client_id": "621584861964-2vk0q20161hq4i05s52rfhotuej8d0f5.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDQtmkLq-lS-eIm2fs6atmnLCK-t2EKh6s"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "621584861964-2vk0q20161hq4i05s52rfhotuej8d0f5.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "621584861964-g2fmksvvlr3kgh4ui7rm3pcih8pr5rmd.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.jomudev.liliDeliveryCustomer"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

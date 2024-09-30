@@ -17,6 +17,8 @@ export type OrderProductProps = {
   onHandleDelete?: () => void,
 };
 
+let newQuantity;
+
 export default function OrderProduct({ 
   name, 
   price, 
@@ -27,24 +29,28 @@ export default function OrderProduct({
  }: OrderProductProps) {
   const theme = useColorScheme() ?? 'light';
   const [quantity, setQuantity] = useState(initialQuantity);
-
-  useEffect(() => {
-    onChangeQuantity && onChangeQuantity(quantity);
-  }, [quantity]);
   
   const editQuantity = (newQuantity: number) => {
-    if (newQuantity < 10 && newQuantity > 0) 
+    if (newQuantity < 10 && newQuantity > 0) {
       setQuantity(newQuantity);
+      onChangeQuantity(newQuantity);
+    }
   }
 
   const addQuantity = () => {
-    if (quantity < 10)
-      setQuantity(quantity + 1);
+    if (quantity < 10) {
+      newQuantity = quantity + 1
+      setQuantity(newQuantity);
+      onChangeQuantity(newQuantity)
+    }
   };
 
   const removeQuantity = () => {
-    if (quantity > 1 )
-      setQuantity(quantity - 1);
+    if (quantity > 1 ) {
+      newQuantity = quantity - 1;
+      setQuantity(newQuantity);
+      onChangeQuantity(newQuantity)
+    }
   };
 
   return (
@@ -69,17 +75,18 @@ export default function OrderProduct({
           <ListItem.Title style={{ color: Colors[theme].tint }}>{ name }</ListItem.Title>
           <ListItem.Subtitle style={{ color: Colors[theme].tint }}>{ toCurrency(price) }</ListItem.Subtitle>
           <View style={{ flexDirection: 'row', marginTop: 8 }}>
-            <Pressable style={styles.quantityButton} onPress={removeQuantity}>
+            <Pressable style={styles.quantityButton} onPress={() => removeQuantity()}>
               <Icon name="remove-circle-outline" type='ionicon' color={Colors[theme].icon} />
             </Pressable>
             <TextInput 
+              pointerEvents='none'
               style={{width: 24, textAlign: 'center', color: Colors[theme].tint}} 
-              defaultValue="0" 
+              defaultValue={quantity.toString()} 
               value={quantity.toString()} 
               onChangeText={(value) => editQuantity(parseInt(value))} 
               />
             <Pressable style={styles.quantityButton}>
-              <Icon name="add-circle-outline" onPress={addQuantity} type='ionicon' color={Colors[theme].icon} />
+              <Icon name="add-circle-outline" onPress={() => addQuantity()} type='ionicon' color={Colors[theme].icon} />
             </Pressable>
           </View>
         </View>
