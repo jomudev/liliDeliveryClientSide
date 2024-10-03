@@ -1,9 +1,10 @@
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { useColorScheme } from '@/hooks/useColorScheme';
-import { OrderProvider } from '@/contexts/orderCtx';
 import { BusinessProvider } from '@/contexts/businessCtx';
 import { PropsWithChildren } from 'react';
 import StripeProvider from './stripeProvider';
+import React from 'react';
+import AddressesProvider from './addressesCtx';
 
 export default function ContextProviders({ children }: PropsWithChildren) {
   const colorScheme = useColorScheme();
@@ -11,7 +12,9 @@ export default function ContextProviders({ children }: PropsWithChildren) {
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme} >
       <BusinessProvider>
         <StripeProvider>
-          { children }
+          <AddressesProvider>
+            { children }
+          </AddressesProvider>
         </StripeProvider>
       </BusinessProvider>
     </ThemeProvider>

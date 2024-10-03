@@ -4,11 +4,11 @@ import feedback from "@/util/feedback";
 import { TProduct } from "@/hooks/useCatalog";
 import { TBusiness } from "@/contexts/businessCtx";
 
-let domain;
-domain = Platform.OS == 'android' ? "http://10.0.2.2:3000" : "http://127.0.0.1:3000";
+let domain = "https://delivery-test-backend.vercel.app";
 
-
-//domain = "https://delivery-test-backend.vercel.app";
+if (process.env.NODE_ENV == 'development') {
+  domain = Platform.OS == 'android' ? "http://10.0.2.2:3000" : "http://127.0.0.1:3000";
+}
 
 const apiURL = domain;
 

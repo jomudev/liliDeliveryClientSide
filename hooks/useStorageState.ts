@@ -1,16 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as React from 'react';
-
-type UseStateHook<T> = [[boolean, T | null], (value: T | null) => void];
-
-function useAsyncState<T>(
-  initialValue: [boolean, T | null] = [true, null],
-): UseStateHook<T> {
-  return React.useReducer(
-    (state: [boolean, T | null], action: T | null = null): [boolean, T | null] => [false, action],
-    initialValue
-  ) as UseStateHook<T>;
-}
+import { useState } from 'react';
 
 export async function setStorageItemAsync(key: string, value: string | null) {
     if (value == null) {
@@ -20,26 +10,26 @@ export async function setStorageItemAsync(key: string, value: string | null) {
     }
 }
 
-export function useStorageState(key: string): UseStateHook<string> {
+export function useStorageState<T>(key: string, defaultValue: T) {
   // Public
-  const [state, setState] = useAsyncState<string>([true, null]);
+  const [state, setState] = useState<T>(defaultValue);
 
   // Get
   React.useEffect(() => {
   (async () => {
-    const value = await AsyncStorage.getItem(key);
-    setState(value);
+    let stringValue = await AsyncStorage.getItem(key);
+    if (stringValue != null) {
+      let value = JSON.parse(stringValue); 
+      setState(value);
+    }
   })()
   }, [key]);
 
   // Set
-  const setValue = React.useCallback(
-    (value: string | null) => {
-      setState(value);
-      setStorageItemAsync(key, value);
-    },
-    [key]
-  );
+  const setValue = (value: T) => {
+    setState(value);
+    setStorageItemAsync(key, JSON.stringify(value));
+  };
 
   return [state, setValue];
 }

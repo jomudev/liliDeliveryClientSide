@@ -1,5 +1,4 @@
-import { Dispatch, ReducerAction, useEffect, useReducer } from "react";
-import { ORDER_ACTION_TYPES } from "./useOrders";
+import { Dispatch, ReducerAction, useEffect, useReducer, useState } from "react";
 import { useStorageState } from "./useStorageState";
 import UID from "@/util/UID";
 
@@ -9,6 +8,7 @@ export type TAddress = {
   address: string,
   latitude: number,
   longitude: number,
+  userNote: string,
 };
 
 export const ADDRESSES_ACTION_TYPE = {
@@ -40,50 +40,24 @@ const addressesReducer = (state: TAddress[], action: {type: string, data: any}) 
 }
 
 export default function useAddresses () {
-  const [addresses, dispatch] = useReducer(addressesReducer, []);
-  const [storedAddresses, setStoredAddresses] = useStorageState('@addresses');
-  
-  useEffect(() => {
-    if (Boolean(storedAddresses) && typeof storedAddresses == 'string') {
-      dispatch({
-        type: ADDRESSES_ACTION_TYPE.SET_ADDRESSES,
-        data: JSON.parse(storedAddresses),
-      });
-    }
-  }, [storedAddresses]);
-
-  useEffect(() => {
-    setStoredAddresses(JSON.stringify(addresses));
-    console.info('addresses modified');
-  }, [addresses]);
-
-  useEffect(() => {
-    setStoredAddresses(JSON.stringify(addresses));
-  }, [addresses]);
+  const [addresses, dispatch] = useState<TAddress[]>([]);
 
   function addAddress (address: TAddress) {
-    if (addresses.find((storedAddress: TAddress) => storedAddress.id == address.id || storedAddress.name == address.name)) return;
-    dispatch({
-      type: ORDER_ACTION_TYPES.ADD_ORDER,
-      data: {
-        ...address,
-        id: UID().generate(),
-      },
-    });
+    if (!Boolean(address.name)) return;
+    if (addresses.find((storedAddress: TAddress) => storedAddress.name == address.name)) return;
+    dispatch(addresses.concat(address));
   };
 
   function removeAddress(addressId: number) {
-    dispatch({
-      type: ORDER_ACTION_TYPES.REMOVE_ORDER,
-      data: addressId,
-    });
+    dispatch(addresses.filter((address) => address.id !== addressId));
   }
 
-  function modifyAddress(address: TAddress) {
-    dispatch({
-      type: ORDER_ACTION_TYPES.MODIFY_ORDER,
-      data: address,
-    });
+  function modifyAddress(modifiedAddress: TAddress) {
+    dispatch(addresses.map((address) => address.id == modifiedAddress.id ? modifiedAddress : address));
+  }
+
+  function setAddresses(addresses: TAddress[]) {
+    dispatch(addresses);
   }
 
   return {
@@ -91,5 +65,6 @@ export default function useAddresses () {
     addAddress,
     modifyAddress,
     removeAddress,
+    setAddresses,
   };
 }

@@ -2,6 +2,7 @@ import { PropsWithChildren } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ThemedView, ThemedViewProps } from "./ThemedView";
 import { StyleSheet } from "react-native";
+import React from "react";
 
 export function Container ({ children, ...otherProps }: PropsWithChildren & ThemedViewProps) {
   return (
