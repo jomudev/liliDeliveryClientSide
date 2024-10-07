@@ -3,6 +3,7 @@ import { Platform } from "react-native";
 import feedback from "@/util/feedback";
 import { TProduct } from "@/hooks/useCatalog";
 import { TBusiness } from "@/contexts/businessCtx";
+import { TOrder, TOrderProduct } from "@/hooks/useOrders";
 
 let domain = "https://delivery-test-backend.vercel.app";
 
@@ -60,7 +61,7 @@ export default function () {
       try {
         return (await apiFetch<TBusiness>('/api/business')) || [];
       } catch (err) {
-        feedback(`😨 Connection error, check your internet connection`);
+        console.error(`😨 Connection error, check your internet connection`, err);
         return [];
       }
     },
@@ -69,7 +70,7 @@ export default function () {
       try {
         return await apiFetch<TBusiness>(`/api/business/${businessId}`);
       } catch (err) {
-        feedback(`😨 Connection error, check your internet connection`);
+        console.error(`😨 Connection error, check your internet connection`, err);
         return null;
       }
     },
@@ -78,7 +79,7 @@ export default function () {
       try {
         return await apiFetch(`/api/categories/${businessId}`);
       } catch (err) {
-        feedback(`😨Error trying to get database category info: ${err}`);
+        console.error(`😨Error trying to get database category info`, err);
         return [];
       }
     },
@@ -90,7 +91,7 @@ export default function () {
           body: JSON.stringify({ businessId }),
         });
       } catch (err) {
-        feedback(`😨Error trying to get database category products: ${err}`);
+        console.error(`😨Error trying to get database category products`, err);
         return [];
       }
     },
@@ -99,8 +100,8 @@ export default function () {
       try {
         const apiResponseProducts = await apiFetch<TProduct[]>(`/api/products/${businessId}`);
         return apiResponseProducts;
-      } catch(e) {
-        feedback(`Check your network signal...`, e);
+      } catch(err) {
+        console.error(`Check your network signal...`, err);
         return [];
       }
     },
@@ -109,11 +110,50 @@ export default function () {
       try {
         const apiResponse = await apiFetch('orders/createOrder');
         if (Object.hasOwn(apiResponse, 'errorMessage')) {
-          throw new Error('an error has ocurred' + piResponse.errorMessage);
+          throw new Error('an error has ocurred' + apiResponse.errorMessage);
         }
       } catch (err) {
         console.log('api error', err);        
       }
-    }
+    },
+
+    async createOrder({
+      paymentIntent,
+      order,
+      orderTotal,
+      userId,
+      branchId,
+    }: {
+      paymentIntent: string,
+      order: TOrderProduct[],
+      orderTotal: number,
+      userId: string,
+      branchId: number,
+    }) {
+      if (!orderTotal) return;
+      if (!order) return;
+      if (!userId) return;
+      if (!branchId) return;
+      if (!paymentIntent) return;
+      
+      try {
+        const apiResponse = await apiFetch('orders/createOrder', {
+          method: 'POST',
+          body: JSON.stringify({
+            paymentIntent,
+            products: order,
+            total: orderTotal,
+            userId,
+            branchId,
+          }),
+        });
+        if (Object.hasOwn(apiResponse, 'errorMessage')) {
+          throw new Error('an error has ocurred' + apiResponse.errorMessage);
+        }
+      } catch (err) {
+        console.log('api error', err);
+        throw err;
+      }
+    }  
   }
 }

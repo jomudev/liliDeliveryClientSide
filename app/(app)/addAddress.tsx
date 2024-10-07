@@ -13,6 +13,7 @@ import addressAPI, { emptyGeocodeResult, GeocodeResult, TAddressComponent } from
 import { useNavigation } from "expo-router";
 import { AddressesContext } from "@/contexts/addressesCtx";
 import React from "react";
+import UID from "@/util/UID";
 
 export function useLocation() {
   const [location, setLocation] = useState<Location.LocationObject>();
@@ -92,24 +93,29 @@ export default function addAddressScreen () {
       lat: latitude,
       lng: longitude,
     });
-    let addressWithMaxComponentsIndex = 0;
-    approximatedAddresses.forEach((address: GeocodeResult, index: number) => {
-      if (index == addressWithMaxComponentsIndex) return;
-      if (address.addressComponents.length > approximatedAddresses[addressWithMaxComponentsIndex].addressComponents.length) {
-        addressWithMaxComponentsIndex = index;
-      }
-    });
-    let addressWithMostComponents = approximatedAddresses[addressWithMaxComponentsIndex];
+    let addressWithMostComponents = approximatedAddresses.reduce(
+      (prevAddress, currentAddress) => 
+        prevAddress.addressComponents.length > currentAddress.addressComponents.length 
+        ? prevAddress 
+        : currentAddress, approximatedAddresses[0]
+      );
     const address = addressWithMostComponents || emptyGeocodeResult;
     const { street, streetNumber, neighborhood, city, apt, zipCode, state } = getAddressComponents(address);
-    
+    let streetAddress = streetNumber.trim();
+    streetAddress += (Boolean(street.trim() && Boolean(streetNumber.trim())) 
+      ? ',' : '') + street.trim();
+    streetAddress += (Boolean(neighborhood.trim() && (Boolean(street.trim()) || Boolean(streetNumber.trim()))) ? ',' :  '') + neighborhood.trim();
+    streetAddress = streetAddress.trim();
+      
     setAddress({
       addressAlias,
-      streetAddress: streetNumber.trim() + (Boolean(street) ? ',' : '') + street.trim() + (Boolean(neighborhood) ? ',' :  '') + neighborhood.trim(),
+      streetAddress,
       apt: apt,
       city: city,
       zipCode: zipCode,
       countryState: state,
+      addressLine1: streetAddress,
+      addressLine2: '',
     });
   }
 
@@ -181,11 +187,17 @@ export default function addAddressScreen () {
             style={StyledLinkStyles} 
             onPress={() => {
               addAddress({
+                id: UID().generate(),
                 name: addressAlias,
                 address: streetAddress.trim() + ' ' + apt.trim() + ' ' + zipCode.trim() + city.trim() + ' ' + countryState.trim() + ' ', 
                 userNote: userNote,
                 longitude: region.longitude,
                 latitude: region.latitude,
+                city: city.trim(),
+                state: countryState.trim(),
+                zip: zipCode.trim(),
+                addressLine1: streetAddress.trim(),
+                addressLine2: apt.trim(), 
               });
               navigation.goBack();
             }} >

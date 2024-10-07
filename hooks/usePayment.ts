@@ -7,6 +7,7 @@ import { AuthContext } from "@/contexts/authCtx";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { OrderContext } from "@/contexts/orderCtx";
 import feedback from "@/util/feedback";
+import { AddressesContext } from "@/contexts/addressesCtx";
 const api = paymentAPI();
 
 export function useStripeLocalCustomer() {
@@ -33,9 +34,10 @@ export function useStripeLocalCustomer() {
 export default function usePayment(amount: number){
   const { initPaymentSheet, presentPaymentSheet } = useStripe();
   const { localStripeCustomer, setLocalStripeCustomer } = useStripeLocalCustomer();
-  const paymentSheetInitialized = useRef(false);
   const { user } = useContext(AuthContext);
+  const { selectedAddress, addresses } = useContext(AddressesContext);
   const [loading, setLoading] = useState(false);
+  const address = useRef(addresses.find((address) => address.id == selectedAddress));
 
   const initializePaymentSheet = async () => {
     const {
@@ -58,31 +60,37 @@ export default function usePayment(amount: number){
       //methods that complete payment after a delay, like SEPA Debit and Sofort.
       allowsDelayedPaymentMethods: true,
       defaultBillingDetails: {
-        name: user?.displayName,
-        email: user?.email,
-        phone: user?.phoneNumber,
-      },
+        name: user?.displayName || undefined,
+        email: user?.email || undefined,
+        phone: user?.phoneNumber || undefined,
+        address: {
+          city: address.current?.city,
+          state: address.current?.state,
+          line1: address.current?.addressLine1,
+          line2: address.current?.addressLine2,
+        }
+      }, 
       googlePay: {
         merchantCountryCode: 'US',
         testEnv: true,
         currencyCode: 'usd',
       },
     });
-    paymentSheetInitialized.current = true;
     if (error) {
-      setLoading(true);
-      console.error('stripe payment-sheet error', error);
-      return;
+      setLoading(false);
+      throw error.message;
     }
     setLoading(false);
+    return paymentIntent;
   };
 
   const openPaymentSheet = async () => {
     setLoading(true);
     
     let error;
+    let paymentIntent;
     try {
-      await initializePaymentSheet();
+      paymentIntent = await initializePaymentSheet();
       error = (await presentPaymentSheet()).error;
     } catch (err) {
       console.error(err);
@@ -91,13 +99,12 @@ export default function usePayment(amount: number){
       return;
     }
 
-    if (error) {  
-      console.error(`${error.code}`, error.message);
-    } else {
-      Alert.alert('Success', 'Your order is in process!');
-    }
     setLoading(false);
-    return error;
+    if (error) {  
+      console.error('stripe payment-sheet error', JSON.stringify(error, null, 2));
+      throw error;
+    }
+    return paymentIntent;
   };
 
   return {

@@ -1,4 +1,5 @@
 import feedback from "@/util/feedback";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useEffect, useReducer, useRef, useState } from "react";
 import { Alert } from "react-native";
 
@@ -24,7 +25,6 @@ export type TOrder = {
   product: TOrderProduct[],
   productComplements: TProductComplement[],
   total: number,
-
 }
 
 export const ORDER_ACTION_TYPES = {
@@ -32,10 +32,15 @@ export const ORDER_ACTION_TYPES = {
   REMOVE_ORDER: 'remove',
   MODIFY_ORDER: 'modify',
   CLEAR: 'clear',
+  SET_ORDER: 'set',
 };
 
 function orderReducer (order: TOrderProduct[], action: { type: string, data: any}) {
   let newOrder: TOrderProduct[];
+  if (action.type == ORDER_ACTION_TYPES.SET_ORDER) {
+    newOrder = action.data;
+    return newOrder;
+  }
   if (action.type == ORDER_ACTION_TYPES.ADD_ORDER) {
     newOrder = order.concat(action.data);
     return newOrder;
@@ -119,13 +124,29 @@ export default function useOrder() {
   }
 
   useEffect(() => {
+    (async function () {
+      let storedOrderString = await AsyncStorage.getItem('@order');
+      let parsedStoredOrder: TOrderProduct[] = Array.from(JSON.parse(storedOrderString || '[]'));
+      const validOrder = parsedStoredOrder.filter((order) => Object.hasOwn(order, 'name')); 
+      if (!validOrder.length) return;
+      businessOrder.current = validOrder[0].branchId;
+      dispatch({
+        type: ORDER_ACTION_TYPES.SET_ORDER,
+        data: validOrder,
+      });
+    })()
+  }, []);
+
+  useEffect(() => {
     orderSubtotal = order.reduce((prev, current) => prev + (current.price * current.quantity), 0);
     setSubtotal(orderSubtotal);
+    AsyncStorage.setItem('@order', JSON.stringify(order));
   }, [order]);
 
   return { 
     order, 
     orderSubtotal: subtotal, 
+    businessOrder: businessOrder.current,
     clearOrder,
     addProductToOrder, 
     removeProductFromOrder, 

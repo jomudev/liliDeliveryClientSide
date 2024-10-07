@@ -1,6 +1,6 @@
 import { apiFetch } from '@/apis/databaseAPI';
 
-export const emptyAddress: TAddressComponent = {
+export const emptyAddressComponent: TAddressComponent = {
   long_name: '',
   short_name: '', 
   types: '',
@@ -32,7 +32,7 @@ export type LatLngBounds = {
   southwest: LatLngLiteral,
 };
 
-export const emptyADdressGeometry: AddressGeometry = {
+export const emptyAddressGeometry: AddressGeometry = {
   bounds: emptyLatLngBounds,
   location: emptyLatLngLiteral,
   location_type: '',
@@ -49,7 +49,7 @@ export type AddressGeometry = {
 export const emptyGeocodeResult: GeocodeResult = {
   addressComponents: [],
   formattedAddress: '',
-  geometry: emptyADdressGeometry,
+  geometry: emptyAddressGeometry,
   partialMatch: false,
   placeId: '',
   postCodes: [],

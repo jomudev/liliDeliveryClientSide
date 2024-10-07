@@ -1,28 +1,35 @@
 import useAddresses, { TAddress } from "@/hooks/useAddresses";
 import React, { createContext, PropsWithChildren, useEffect } from "react";
-import useStorageAddresses from "@/hooks/useStorageAddresses";
-import { useStorageState } from "@/hooks/useStorageState";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export const AddressesContext = createContext<{
   addresses: TAddress[],
   addAddress: (address: TAddress) => void,
   modifyAddress: (address: TAddress) => void,
-  removeAddress: (addressId: number) => void,
+  removeAddress: (addressId: string) => void,
+  selectedAddress: string | null,
+  selectAddress: (addressId: string) => void,
+  unselectAddress: () => void,
 }>({
   addresses: [],
   addAddress: () => {},
   modifyAddress: () => {},
   removeAddress: () => {},
+  selectedAddress: null,
+  selectAddress: () => {},
+  unselectAddress: () => {},
 });
 
 export default function AddressesProvider ({ children }: PropsWithChildren) {
   const { 
-    setAddresses, 
     addresses, 
+    selectedAddress,
+    setAddresses, 
     addAddress,
     modifyAddress, 
-    removeAddress
+    removeAddress,
+    selectAddress,
+    unselectAddress,
   } = useAddresses();
 
   useEffect(() => {
@@ -31,6 +38,11 @@ export default function AddressesProvider ({ children }: PropsWithChildren) {
       let parsedStoredAddresses: TAddress[] = Array.from(JSON.parse(storedAddressesString || '[]'));
       const validAddresses = parsedStoredAddresses.filter((address) => Object.hasOwn(address, 'name')); 
       setAddresses(validAddresses);
+      let storedSelectedAddress = await AsyncStorage.getItem('@selectedAddress');
+      console.log('SELECTED ADDRESS', storedSelectedAddress);
+      if (storedSelectedAddress) {
+        selectAddress(storedSelectedAddress);
+      }
     })()
   }, []);
 
@@ -48,6 +60,9 @@ export default function AddressesProvider ({ children }: PropsWithChildren) {
       addAddress: handleAddAddress,
       modifyAddress,
       removeAddress,
+      selectedAddress,
+      selectAddress,
+      unselectAddress,
     }}>
       { children }
     </AddressesContext.Provider>

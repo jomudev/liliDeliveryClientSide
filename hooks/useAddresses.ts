@@ -1,14 +1,18 @@
-import { Dispatch, ReducerAction, useEffect, useReducer, useState } from "react";
-import { useStorageState } from "./useStorageState";
-import UID from "@/util/UID";
+import { useState } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export type TAddress = {
-  id?: number,
+  id: string,
   name: string,
   address: string,
   latitude: number,
   longitude: number,
   userNote: string,
+  city: string,
+  state: string,
+  zip: string,
+  addressLine1: string,
+  addressLine2: string,
 };
 
 export const ADDRESSES_ACTION_TYPE = {
@@ -41,14 +45,30 @@ const addressesReducer = (state: TAddress[], action: {type: string, data: any}) 
 
 export default function useAddresses () {
   const [addresses, dispatch] = useState<TAddress[]>([]);
+  const [selectedAddress, setSelectedAddress] = useState<string | null>(null);
 
   function addAddress (address: TAddress) {
-    if (!Boolean(address.name)) return;
-    if (addresses.find((storedAddress: TAddress) => storedAddress.name == address.name)) return;
+    if (!address) return;
+    if (!Object.hasOwn(address, 'name')) return;
+    if (!Object.hasOwn(address, 'id')) return;
+    let addressExist = addresses.find((storedAddress: TAddress) => storedAddress.id == address.id);
+    addressExist = addressExist || addresses.find((storedAddress: TAddress) => storedAddress.name == address.name);
+    if (addressExist) return;
     dispatch(addresses.concat(address));
   };
 
-  function removeAddress(addressId: number) {
+  function selectAddress(addressId: string) {
+    if (!addressId) return;
+    if (selectedAddress == addressId) return;
+    setSelectedAddress(addressId);
+    AsyncStorage.setItem('@selectedAddress', addressId);
+  }
+
+  function unselectAddress() {
+    setSelectedAddress(null);
+  }
+
+  function removeAddress(addressId: string) {
     dispatch(addresses.filter((address) => address.id !== addressId));
   }
 
@@ -62,9 +82,12 @@ export default function useAddresses () {
 
   return {
     addresses,
+    selectedAddress,
     addAddress,
     modifyAddress,
     removeAddress,
     setAddresses,
+    selectAddress,
+    unselectAddress,
   };
 }

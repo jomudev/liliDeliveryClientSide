@@ -3,6 +3,8 @@ import { useState } from "react";
 export type TAddressForm = {
   addressAlias: string,
   streetAddress: string,
+  addressLine1: string,
+  addressLine2: string,
   apt: string,
   city: string,
   countryState: string,
@@ -21,8 +23,10 @@ export const addressFormActionTypes = {
 
 export default function useAddressForm() {
   const [state, dispatch] = useState<TAddressForm>({
-    addressAlias: 'Main address',
+    addressAlias: 'Home',
     streetAddress: '',
+    addressLine1: '',
+    addressLine2: '',
     apt: '',
     city: '',
     countryState: '',

@@ -5,6 +5,7 @@ import { createContext, type PropsWithChildren } from "react";
 export const OrderContext = createContext<{ 
   order: TOrderProduct[], 
   orderSubtotal: number, 
+  businessOrder: number | null,
   clearOrder: () => void,
   addProductToOrder: (product: TOrderProduct) => void, 
   removeProductFromOrder: (productId: number) => void, 
@@ -12,6 +13,7 @@ export const OrderContext = createContext<{
 }>({
   order: [],
   orderSubtotal: 0,
+  businessOrder: null,
   clearOrder: () => {},
   addProductToOrder: () => {},
   removeProductFromOrder: () => {},
