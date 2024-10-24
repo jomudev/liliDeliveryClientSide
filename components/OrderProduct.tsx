@@ -7,9 +7,13 @@ import { useColorScheme } from "@/hooks/useColorScheme";
 import { Colors } from "@/constants/Colors";
 import { useEffect, useState } from "react";
 import { ThemedText } from "./ThemedText";
+import { TComplement } from "@/app/(app)/addComplement";
+import React from "react";
+import { totalizeByProperty } from "@/util/totalizeByProperty";
 
 export type OrderProductProps = {
   name: string,
+  complements: TComplement[],
   price: number,
   quantity: number,
   imageURL: string,
@@ -23,6 +27,7 @@ export default function OrderProduct({
   name, 
   price, 
   quantity: initialQuantity, 
+  complements,
   imageURL, 
   onChangeQuantity = () => {},
   onHandleDelete = () => {},
@@ -71,9 +76,9 @@ export default function OrderProduct({
         <View style={{ minHeight: 100, flex: 0.33, alignItems: 'center' }}>
           <Image src={imageURL} style={{ height: 100, width: 100, borderRadius: 24 }} />
         </View>
-        <View style={{ flex: 0.66 }}>
+        <View style={{ flex: 0.33 }}>
           <ListItem.Title style={{ color: Colors[theme].tint }}>{ name }</ListItem.Title>
-          <ListItem.Subtitle style={{ color: Colors[theme].tint }}>{ toCurrency(price) }</ListItem.Subtitle>
+          <ListItem.Subtitle style={{ color: Colors[theme].tint }}>{ toCurrency(price + totalizeByProperty(complements, 'value')) }</ListItem.Subtitle>
           <View style={{ flexDirection: 'row', marginTop: 8 }}>
             <Pressable style={styles.quantityButton} onPress={() => removeQuantity()}>
               <Icon name="remove-circle-outline" type='ionicon' color={Colors[theme].icon} />
@@ -89,6 +94,24 @@ export default function OrderProduct({
               <Icon name="add-circle-outline" onPress={() => addQuantity()} type='ionicon' color={Colors[theme].icon} />
             </Pressable>
           </View>
+        </View>
+        <View style={{ flex: 0.33 }}>
+          {
+            complements && complements.map((complement: TComplement, index: number) => (
+              <Image 
+                key={index}
+                src={complement.imageURL} 
+                style={{ 
+                  height: 30, 
+                  width: 30, 
+                  left: index * 10,
+                  borderWidth: 1,
+                  borderColor: Colors[theme].tabIconDefault,
+                  position: 'absolute',
+                  borderRadius: 24 
+                }} />
+            ))
+          }
         </View>
       </ListItem.Content>
     </ListItem.Swipeable>

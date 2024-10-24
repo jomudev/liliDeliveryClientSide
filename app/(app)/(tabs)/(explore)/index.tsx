@@ -3,44 +3,43 @@ import { Image } from '@/components/Image';
 import { HelloWave } from '@/components/HelloWave';
 import ParallaxScrollView from '@/components/ParallaxScrollView';
 import ParallaxViewHeader from '@/components/ParallaxViewHeader';
-import { useContext, useEffect, useState } from 'react';
+import { useCallback, useContext, useEffect, useState } from 'react';
 import { randomDishImageURL } from '@/util/randomDishImage';
 import { AuthContext } from '@/contexts/authCtx';
 import { Avatar } from '@rneui/themed';
-import Business from '@/components/Business';
 import { ThemedView } from '@/components/ThemedView';
+import React from 'react';
+import Branches from '@/components/Branches';
 
 export default function HomeScreen() {
   const [headerImage, setHeaderImage] = useState('');
   const { user, signOut } = useContext(AuthContext);
 
-  useEffect(() => {
+  const getRandomDish = useCallback(() => {
     randomDishImageURL().then((imageURL) => {
       setHeaderImage(imageURL);
     })
   }, []);
 
+  useEffect(() => {
+    getRandomDish();
+  }, []);
+
   return (
     <ParallaxScrollView 
       headerBackgroundColor={{ light: '#FFE37E', dark: '#FF7D70' }}
-      headerImage={
-        <Image 
-          src={headerImage} 
-          style={styles.headerImage}
-          />
-      }
-      headerContent={ 
-        <ParallaxViewHeader 
-          title={"🍔 Cravings? Consider them solved! 😋"} 
-          subtitle={"🔍 Discover Your Faves! 💖"}
-          lightColor='white'
-          darkColor='white'>
-            <Avatar size={32} onPress={() => signOut()} source={{ uri: user?.photoURL }} rounded containerStyle={styles.avatar} />
-        </ParallaxViewHeader>
-      }
-      >
+      headerImage={<Image
+        src={headerImage}
+        style={styles.headerImage} />}
+      headerContent={<ParallaxViewHeader
+        title={"🍔 Cravings? Consider them solved! 😋"}
+        subtitle={"🔍 Discover Your Faves! 💖"}
+        lightColor='white'
+        darkColor='white'>
+        <Avatar size={32} onPress={() => signOut()} source={{ uri: user?.photoURL }} rounded containerStyle={styles.avatar} />
+      </ParallaxViewHeader>} showBackButton={false}>
       <ThemedView style={styles.container}>
-        <Business />
+        <Branches />
       </ThemedView>
     </ParallaxScrollView>
   );

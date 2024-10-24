@@ -3,11 +3,9 @@ import React from 'react';
 import { TabBarIcon } from '@/components/navigation/TabBarIcon';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
-import { BusinessProvider } from '@/contexts/businessCtx';
-import { OrderProvider } from '@/contexts/orderCtx';
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
+  const colorScheme = useColorScheme();   
 
   return (
     <Tabs
@@ -16,7 +14,7 @@ export default function TabLayout() {
         headerShown: false,
       }}>
       <Tabs.Screen
-        name="index"
+        name="(explore)" 
         options={{
           title: 'Explore',
           tabBarIcon: ({ color, focused }) => (

@@ -1,9 +1,9 @@
-import { createContext, type PropsWithChildren } from 'react';
+import React, { createContext, type PropsWithChildren } from 'react';
 import { TUserData } from '@/apis/firebase';
 import useSignIn from '@/util/useSignIn';
 
 export const AuthContext = createContext<{
-  signIn: (method: string) => void;
+  signIn: (method: signInMethods) => void;
   signOut: () => void;
   user?: TUserData | null;
   isLoading: Boolean;
@@ -14,6 +14,8 @@ export const AuthContext = createContext<{
   isLoading: false,
 });
 
+export type signInMethods = 'google' | 'apple';
+
 export function SessionProvider({ children }: PropsWithChildren) {
   const {
     user, 
@@ -22,20 +24,19 @@ export function SessionProvider({ children }: PropsWithChildren) {
     logout 
   } = useSignIn();
   
-  const signInMethods: Record<string, () => Promise<void>> = {
+  const signInMethods: Record<signInMethods, () => Promise<void>> = {
     google: signInWithGoogle,
+    apple: () => new Promise(() => {}),
   };
+
+  const signIn = (method: signInMethods) => signInMethods[method]();
+  const signOut = () => logout();
   
   return (
     <AuthContext.Provider
       value={{
-        signIn: (method: string, value?: string) => {
-          // Perform sign-in logic here      
-          signInMethods[method]();
-        },
-        signOut: () => {
-          logout();
-        },
+        signIn,
+        signOut,
         user,
         isLoading,
       }}>

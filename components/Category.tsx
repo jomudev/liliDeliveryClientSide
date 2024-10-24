@@ -6,15 +6,17 @@ import Product from "./Product";
 import UID from "@/util/UID";
 import { OrderContext } from "@/contexts/orderCtx";
 import { memo, useContext } from "react";
+import React from "react";
+import { TComplement } from "@/app/(app)/addComplement";
 
 export type CategoryProps = {
+  branchId: string;
   name: string;
   products: TProduct[];
 };
 
 const MemoProduct = memo(Product);
-export default function Category ({ name, products}: CategoryProps) {
-  const { addProductToOrder} = useContext(OrderContext);
+export default function Category ({ branchId, name, products}: CategoryProps) {
   return (
     <ThemedView>
       <ThemedView style={styles.categoryHeader}>
@@ -25,18 +27,9 @@ export default function Category ({ name, products}: CategoryProps) {
           <Product 
             key={UID().generate()} 
             {...product}
-            handleAddToCart={() => addProductToOrder({
-              id: product.id,
-              name: product.name,
-              description: product.description,
-              price: product.price,
-              quantity: 1,
-              imageURL: product.imageURL,
-              businessId: product.businessId,
-              branchId: product.branchId,
-            })}
-            />
-        ) )
+            branchId={branchId}
+          />
+        ))
       }
     </ThemedView>
   )

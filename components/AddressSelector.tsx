@@ -13,8 +13,8 @@ export type AddressSelectorProps = {
   onSelectAddress: (address: TAddress) => void;
 }
 
-export default function AddressSelector () {
-  const { addresses, selectedAddress, selectAddress } = useContext(AddressesContext);
+export default function AddressSelector ({ onSelectAddress }: AddressSelectorProps) {
+  const { addresses } = useContext(AddressesContext);
   const theme = useColorScheme() ?? 'light';
   return (
     <ScrollView 
@@ -26,7 +26,7 @@ export default function AddressSelector () {
         ]} >
       {
         addresses.map((address: TAddress) => (
-          <AddressSelectorItem address={address} key={UID().generate()} />
+          <AddressSelectorItem onPress={() => onSelectAddress(address)} address={address} key={UID().generate()} />
         ))
       }
       <StyledLink href='/(app)/addresses'>

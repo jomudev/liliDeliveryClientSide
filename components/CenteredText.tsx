@@ -1,8 +1,10 @@
+import { TextProps } from "@rneui/base";
 import { ThemedText } from "./ThemedText";
 import { StyleSheet } from "react-native";
+import React from "react";
 
-export default function CenteredText ({children}: { children: string }) {
-  return <ThemedText style={styles.text}>{ children }</ThemedText>
+export default function CenteredText ({children, ...props}: { children: string } & TextProps) {
+  return <ThemedText style={styles.text} {...props}>{ children }</ThemedText>
 }
 
 const styles = StyleSheet.create({

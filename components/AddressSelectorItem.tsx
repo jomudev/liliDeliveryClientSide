@@ -4,15 +4,19 @@ import React, { useContext } from "react";
 import { AddressesContext } from "@/contexts/addressesCtx";
 import { TAddress } from "@/hooks/useAddresses";
 import UID from "@/util/UID";
-import { StyledLinkStyles } from "./StyledLink";
 import { Colors } from "@/constants/Colors";
 
-export default function AddressSelectorItem ({ address }: { address: TAddress }) {
-  const { selectedAddress, selectAddress } = useContext(AddressesContext);
+export default function AddressSelectorItem ({ address, onPress }: { address: TAddress, onPress: () => void }) {
+  const { selectedAddress } = useContext(AddressesContext);
   const theme = useColorScheme() ?? 'light';
+
+  function handleOnPress () {
+    if (onPress) onPress();
+  }
+
   return (
     <Pressable 
-      onPress={() => selectAddress(address.id)}
+      onPress={handleOnPress}
       key={UID().generate()} 
       style={{
         ...styles.addressItem,

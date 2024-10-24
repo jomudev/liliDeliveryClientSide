@@ -1,27 +1,26 @@
-import { ThemedView } from "@/components/ThemedView";
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { StyleSheet, Image } from 'react-native';
+import { StyleSheet, Image, View } from 'react-native';
 import { GoogleSigninButton } from '@react-native-google-signin/google-signin';
+import React, { useContext, useEffect } from "react";
 import { AuthContext } from "@/contexts/authCtx";
-import React, { useContext } from "react";
-import { Redirect } from "expo-router";
+import LiliLogo from '@/assets/images/lilisdeliveryLogo.jpeg';
+import { Redirect, SplashScreen } from 'expo-router';
+import LoadingIndicator from '@/components/LoadingIndicator';
 
-export default function SignIn() {
-  const { user, signIn } = useContext(AuthContext);
+SplashScreen.preventAutoHideAsync();
 
-  if (user) {
-    return <Redirect href={'/(app)/(tabs)'} />
-  }
-
+export default function SignInScreen() {
+  const { signIn } = useContext(AuthContext);
+ 
   return (
     <SafeAreaView style={styles.container}>
-      <ThemedView style={styles.signInForm}>
-        <Image source={require('@/assets/images/lilisdeliveryLogo.jpeg')} style={styles.logo} />
+      <View style={styles.signInForm}>
+        <Image source={LiliLogo} style={styles.logo} />
         <GoogleSigninButton 
           onPress={ () => signIn('google') }
           size={GoogleSigninButton.Size.Standard}
-        />
-      </ThemedView>
+        />  
+      </View>
     </SafeAreaView>
   );
 }
@@ -29,7 +28,7 @@ export default function SignIn() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'white',
+    backgroundColor: '#A984D9',
   },
   phoneInput: {
     width: '80%',

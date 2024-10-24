@@ -9,44 +9,46 @@ import { StyleSheet } from "react-native";
 import { Image } from "@/components/Image";
 import Catalog from "@/components/Catalog";
 import { ThemedView } from "@/components/ThemedView";
+import React from "react";
 
-export function useBusinessInfo(businessId: number) {
-  const [businessInfo, setBusinessInfo] = useState<TBusiness | null>();
+export function useBranchInfo(branchId: number) {
+  const [branchInfo, setBusinessInfo] = useState<TBusiness | null>();
   useEffect(() => {
     (async function () {
-      const apiResponse = await databaseAPI().getBusinessInfo(businessId);
+      const apiResponse = await databaseAPI().getBusinessInfo(branchId);
       setBusinessInfo(apiResponse);
     })();
-  }, []); 
-  return businessInfo;
+  }, [branchId]); 
+  return branchInfo;
 }
 
 export default function businessCatalog() {
-  const { businessId }: { businessId: string } = useLocalSearchParams();
-  const businessInfo = useBusinessInfo(parseInt(businessId));
+  const { branchId }: { branchId: string } = useLocalSearchParams();
+  const branchInfo = useBranchInfo(parseInt(branchId));
 
-  if (!businessInfo) return <LoadingIndicator />;
+  if (!branchInfo) return <LoadingIndicator />;
+
   return (
     <ParallaxScrollView
       showBackButton
       headerBackgroundColor={{ light: '#FFE37E', dark: '#FF7D70' }}
       headerImage={
         <Image 
-          src={businessInfo.imageURL} 
+          src={branchInfo.imageURL} 
           style={styles.headerImage}
           />
       }
       headerContent={ 
         <ParallaxViewHeader 
-          title={`🏬 ${businessInfo.name}`} 
-          subtitle={Boolean(businessInfo.description) ? `✨ ${businessInfo.description}` : ''}
+          title={`🏬 ${branchInfo.name}`} 
+          subtitle={Boolean(branchInfo.description) ? `✨ ${branchInfo.description}` : ''}
           lightColor='white'
           darkColor='white'
           />
       }
       >
         <ThemedView style={styles.container}>
-          <Catalog businessId={businessId} />
+          <Catalog branchId={branchId} />
         </ThemedView>
     </ParallaxScrollView>
   );

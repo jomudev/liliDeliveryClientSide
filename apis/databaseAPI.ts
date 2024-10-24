@@ -1,9 +1,11 @@
 import { TUserData } from "./firebase";
 import { Platform } from "react-native";
-import feedback from "@/util/feedback";
 import { TProduct } from "@/hooks/useCatalog";
 import { TBusiness } from "@/contexts/businessCtx";
 import { TOrder, TOrderProduct } from "@/hooks/useOrders";
+import { TAddress } from "@/hooks/useAddresses";
+import { TGroupedComplements } from "@/app/(app)/addComplement";
+import feedback from "@/util/feedback";
 
 let domain = "https://delivery-test-backend.vercel.app";
 
@@ -43,6 +45,14 @@ export async function apiFetch<T>(pathName: string, options?: RequestInit): Prom
 
 export default function () {
   return {
+    async getProduct(productId: string): Promise<TProduct | null> {
+      try {
+        return await apiFetch(`/products/${productId}`);
+      } catch (err) {
+        console.error(`😨 Error trying to get product info`, err);
+        return null;
+      }
+    },
     async createUser (user: TUserData) {
       try {
         return await apiFetch("/api/createUser", {
@@ -57,7 +67,7 @@ export default function () {
         return null;
       }
     },  
-    async getBusiness(): Promise<TBusiness[] | null> {
+    async getBusiness(): Promise<TBusiness[]> {
       try {
         return (await apiFetch<TBusiness>('/api/business')) || [];
       } catch (err) {
@@ -117,35 +127,25 @@ export default function () {
       }
     },
 
-    async createOrder({
-      paymentIntent,
-      order,
-      orderTotal,
-      userId,
-      branchId,
-    }: {
+    async createOrder(orderData: {
       paymentIntent: string,
       order: TOrderProduct[],
       orderTotal: number,
+      shippingAddress: TAddress | null,
+      shippingComment: string,
+      shippingContact: string,
       userId: string,
-      branchId: number,
+      branchId: string | null, 
     }) {
-      if (!orderTotal) return;
-      if (!order) return;
-      if (!userId) return;
-      if (!branchId) return;
-      if (!paymentIntent) return;
-      
+      if (!orderData.orderTotal) throw new Error('order total is required');
+      if (!orderData.order) throw new Error('order is required');
+      if (!orderData.userId) throw new Error('user id is required');
+      if (!orderData.branchId) throw new Error('branch id is required');
+      if (!orderData.paymentIntent) throw new Error('payment intent is required');
       try {
         const apiResponse = await apiFetch('orders/createOrder', {
           method: 'POST',
-          body: JSON.stringify({
-            paymentIntent,
-            products: order,
-            total: orderTotal,
-            userId,
-            branchId,
-          }),
+          body: JSON.stringify(orderData),
         });
         if (Object.hasOwn(apiResponse, 'errorMessage')) {
           throw new Error('an error has ocurred' + apiResponse.errorMessage);
@@ -154,6 +154,31 @@ export default function () {
         console.log('api error', err);
         throw err;
       }
-    }  
+    },
+
+    getPendingOrders: async (userId: string) => {
+        try {
+          const apiResponse: any = (await apiFetch(`/orders/${userId}/pending`));
+          if (Object.hasOwn(apiResponse, 'errorMessage')) {
+            throw new Error('an error has ocurred' + apiResponse.errorMessage);
+          }
+          return apiResponse;
+        } catch (err) {
+          console.log('api error', err);
+          throw err;
+        }
+    },
+    
+    async getProductComplements(productId: string): Promise<TGroupedComplements[]> {
+      try {
+        if (!productId) {
+          throw new Error('productId is required');
+        }
+        return await apiFetch(`/products/${productId}/complements`);
+      } catch (err) {
+        console.error(`😨Error trying to get database complements products`, err);
+        return [];
+      }
+    }
   }
 }

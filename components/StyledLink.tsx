@@ -1,9 +1,9 @@
-import { Href, Link } from "expo-router";
+import { Href, Link, LinkProps } from "expo-router";
 import { PropsWithChildren } from "react";
 import { Pressable, StyleSheet, useColorScheme } from "react-native";
 import { ThemedText } from "./ThemedText";
 
-export type StyledLinkProps = PropsWithChildren & {
+export type StyledLinkProps = PropsWithChildren & LinkProps & {
   href: Href<string>,
 };
 

@@ -1,13 +1,11 @@
 import { Slot } from 'expo-router';
-import { SessionProvider } from '@/contexts/authCtx';
-import { OrderProvider } from '@/contexts/orderCtx';
+import React from 'react';
+import ContextProviders from '@/contexts/ContextProviders';
 
 export default function RootLayout() {
   return (
-    <SessionProvider>
-      <OrderProvider>
-        <Slot />
-      </OrderProvider>
-    </SessionProvider>
+    <ContextProviders>
+      <Slot />
+    </ContextProviders>
   );
 }

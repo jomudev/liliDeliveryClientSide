@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export type TAddress = {
@@ -15,37 +15,22 @@ export type TAddress = {
   addressLine2: string,
 };
 
-export const ADDRESSES_ACTION_TYPE = {
-  ADD_ADDRESS: 'ADD_ADDRESS',
-  MODIFY_ADDRESS: 'MODIFY_ADDRESS',
-  REMOVE_ADDRESS: 'REMOVE_ADDRESS',
-  SET_ADDRESSES: 'SET_ADDRESSES',
-};
-
-const addressesReducer = (state: TAddress[], action: {type: string, data: any}) => {
-  let newState;
-  if (action.type = ADDRESSES_ACTION_TYPE.ADD_ADDRESS) {
-    newState = state.concat(action.data);
-    return newState;
-  }
-  if (action.type === ADDRESSES_ACTION_TYPE.REMOVE_ADDRESS) {
-    newState = state.filter((address) => address.id !== action.data);
-    return newState;
-  }
-  if (action.type == ADDRESSES_ACTION_TYPE.MODIFY_ADDRESS) {
-    newState = state.map((address) => address.id == action.data.id ? action.data : product);
-    return newState; 
-  }
-  if (action.type == ADDRESSES_ACTION_TYPE.SET_ADDRESSES) {
-    newState = action.data;
-    return newState;
-  }
-  return state;
-}
-
 export default function useAddresses () {
   const [addresses, dispatch] = useState<TAddress[]>([]);
   const [selectedAddress, setSelectedAddress] = useState<string | null>(null);
+
+  const getAddresses = useCallback(async () => {
+    let storedAddressesString = await AsyncStorage.getItem('@addresses');
+    let parsedStoredAddresses: TAddress[] = Array.from(JSON.parse(storedAddressesString || '[]'));
+    dispatch(parsedStoredAddresses);
+    if (parsedStoredAddresses.length) {
+      selectAddress(parsedStoredAddresses[0].id);
+    }
+  }, []);
+
+  useEffect(() => {
+    getAddresses();
+  }, [])
 
   function addAddress (address: TAddress) {
     if (!address) return;

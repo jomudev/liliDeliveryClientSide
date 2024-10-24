@@ -12,13 +12,16 @@ import { Icon } from '@rneui/themed';
 import { Colors } from '@/constants/Colors';
 import { useNavigation } from 'expo-router';
 import BlurView from './BlurView';
+import { Image } from './Image';
+import React from 'react';
+import { ThemedText } from './ThemedText';
 
 const HEADER_HEIGHT = 250;
 
 type Props = PropsWithChildren<{
-  headerImage: ReactElement;
+  headerImage: ReactElement | string;
   headerBackgroundColor: { dark: string; light: string };
-  headerContent?: ReactElement;
+  headerContent?: string | ReactElement;
   showBackButton: boolean,
 }>;
 
@@ -60,12 +63,19 @@ export default function ParallaxScrollView({
             { backgroundColor: headerBackgroundColor[colorScheme] },
             headerAnimatedStyle,
           ]}>
-          {headerImage}
-          {headerContent}
+          {typeof headerImage == 'string' ? <Image src={headerImage} style={styles.headerImage} /> : headerImage}
           {
-            showBackButton && (
+            typeof headerContent == 'string' 
+              ? (
+                  <BlurView style={styles.headerContent}> 
+                    <ThemedText> {headerContent}</ThemedText> 
+                  </BlurView>
+                ) : headerContent 
+          }
+          {
+            navigation.canGoBack() && showBackButton && (
             <BlurView style={styles.goBackButton}>
-              <Pressable onPress={() => navigation.goBack()}>
+              <Pressable onPress={() => navigation.canGoBack() && navigation.goBack()}>
                 <Icon name="arrow-back-outline" type={'ionicon'} color={Colors[colorScheme].text} />
               </Pressable>
             </BlurView>
@@ -88,6 +98,11 @@ const styles = StyleSheet.create({
     height: 250,
     overflow: 'hidden',
   },
+  headerImage: {
+    height: 300,
+    width: '100%',
+    overflow: 'hidden',
+  },
   content: {
     flex: 1,
     padding: 32,
@@ -102,5 +117,8 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     elevation: 16,
     padding: 16,
+  },
+  headerContent: {
+
   }
 });

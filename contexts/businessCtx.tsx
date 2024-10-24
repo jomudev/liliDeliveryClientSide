@@ -1,8 +1,9 @@
 import databaseAPI from "@/apis/databaseAPI";
-import { createContext, PropsWithChildren, ReactElement, useContext, useEffect, useState } from "react";
+import React, { createContext, PropsWithChildren, useEffect, useState } from "react";
 
 export type TBusiness = {
-  id: number,
+  id: string,
+  businessId: string,
   name: string;
   description: string;
   averageDeliveryTime: number,
@@ -32,6 +33,7 @@ export function useBusiness() {
       setIsLoading(false);
     })();
   }, []);
+
   return { business, isLoading};
 }
 

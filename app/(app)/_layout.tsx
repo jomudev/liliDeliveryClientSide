@@ -1,35 +1,18 @@
-import { Redirect, Stack } from 'expo-router';
-import * as SplashScreen from 'expo-splash-screen';
-import { useContext } from 'react';
+import { Stack } from 'expo-router';
 import 'react-native-reanimated';
-import { AuthContext } from '@/contexts/authCtx';
-
-import { useColorScheme } from '@/hooks/useColorScheme';
-import ContextProviders from '@/contexts/ContextProviders';
-
-
-// Prevent the splash screen from auto-hiding before asset loading is complete.
-SplashScreen.preventAutoHideAsync();
+import React from 'react';
+import AuthHandler from '@/components/AuthHandler';
 
 export default function HomeLayout() {
-  const { user, isLoading } = useContext(AuthContext);
-  if (isLoading) {
-    return null;
-  }
-
-  if (!Boolean(user)) {
-    SplashScreen.hideAsync();
-    return <Redirect href="/sign-in" />
-  } else {
-    SplashScreen.hideAsync();
-  }
 
   return (
-    <ContextProviders>
+    <AuthHandler>
       <Stack>
         <Stack.Screen name='(tabs)' options={{ headerShown: false }} />
         <Stack.Screen name='addAddress' options={{ headerTitle: 'Add Address', headerBackTitle: 'Back' }} />
+        <Stack.Screen name='addComplement' options={{ headerShown: false }} />
+        <Stack.Screen name='ordersHistory' options={{ headerBackTitle: 'Back', headerTitle: 'Orders History' }} /> 
       </Stack>
-    </ContextProviders>
+    </AuthHandler>
   );
 }

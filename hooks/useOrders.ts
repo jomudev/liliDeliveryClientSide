@@ -1,16 +1,12 @@
-import feedback from "@/util/feedback";
+import { TComplement } from "@/app/(app)/addComplement";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useEffect, useReducer, useRef, useState } from "react";
+import { useCallback, useEffect, useReducer, useRef, useState } from "react";
 import { Alert } from "react-native";
+import { TProduct } from "./useCatalog";
+import { totalizeByProperty } from "@/util/totalizeByProperty";
 
-export type TOrderProduct = {
-  id: number,
-  name: string,
-  description: string,
-  imageURL: string,
-  price: number,
-  branchId: number,
-  businessId: number,
+export type TOrderProduct = TProduct & {
+  complements: TComplement[],
   quantity: number,
 }
 
@@ -42,6 +38,7 @@ function orderReducer (order: TOrderProduct[], action: { type: string, data: any
     return newOrder;
   }
   if (action.type == ORDER_ACTION_TYPES.ADD_ORDER) {
+    if (order.find((product) => product.id == action.data.id)) return order;
     newOrder = order.concat(action.data);
     return newOrder;
   }
@@ -63,52 +60,81 @@ function orderReducer (order: TOrderProduct[], action: { type: string, data: any
 let orderSubtotal = 0;
 
 export default function useOrder() {
-  const businessOrder = useRef<number | null>(null);
+  const branchOrder = useRef<string>();
   const [order, dispatch] = useReducer(orderReducer, []);
   const [subtotal, setSubtotal] = useState(0);
+
+  const getOrder = useCallback(async () =>  {
+    let storedOrderString = await AsyncStorage.getItem('@order');
+
+    let parsedStoredOrder: TOrderProduct[] = Array.from(JSON.parse(storedOrderString || '[]'));
+    const validOrder = parsedStoredOrder.filter((order) => Object.hasOwn(order, 'name')); 
+    if (!validOrder.length) return [];
+    return validOrder;
+  }, []);
+
+  useEffect(() => {
+      AsyncStorage.getItem('@branchOrder').then(localBranchOrder => {
+        if (localBranchOrder?.includes('\\') || localBranchOrder?.includes('/')) {
+          localBranchOrder = localBranchOrder.replace(/([\\"])/g, ''); 
+        }
+        localBranchOrder = JSON.parse(localBranchOrder || ''); 
+        branchOrder.current = localBranchOrder || '';
+      });
+      getOrder().then(validOrder => {
+        dispatch({
+          type: ORDER_ACTION_TYPES.SET_ORDER,
+          data: validOrder,
+        });
+      })
+  }, []);
+
+  useEffect(() => {
+    orderSubtotal = order.reduce((prev, current) => prev + (
+      (current.price + totalizeByProperty(current.complements, 'value')) * current.quantity
+    ), 0);
+    setSubtotal(orderSubtotal);
+    AsyncStorage.setItem('@order', JSON.stringify(order));
+  }, [order]);
 
   function clearOrder() {
     dispatch({
       type: ORDER_ACTION_TYPES.CLEAR,
       data: null,
     });
-    businessOrder.current = null;
+    branchOrder.current = '';
   }
 
   function addProductToOrder(product: TOrderProduct) {
-    if (!businessOrder.current) businessOrder.current = product.branchId;
-    if (!businessOrder.current) return;
-    if (businessOrder.current != product.branchId) {
-      let userSelectNo: boolean = false;
-      Alert.alert('Clear Cart?', 'You have an order from another business, did you want to clear the cart?', [
+    if (!branchOrder.current) branchOrder.current = product.branchId;
+    if (!branchOrder.current) return;
+    if (branchOrder.current.toString() != product.branchId.toString()) {
+      Alert.alert('Clear Cart?', 'You have an order from another business, did you want to clear the cart and set this order?', [
         {
           text: 'Yes, clear the cart',
           onPress: () => {
             clearOrder();
-
+            dispatch({
+              type: ORDER_ACTION_TYPES.ADD_ORDER,
+              data: product,
+            });
           },
         },
         {
           text: 'No',
-          onPress: () => {
-            userSelectNo = true;
-          }
+          onPress: () => {}
         }
       ]);
-      if (userSelectNo) return;
     };
-    
-    if (order.find((prod: TOrderProduct) => prod.id == product.id)) 
-      return
-    
+    AsyncStorage.setItem('@branchOrder', JSON.stringify(branchOrder.current));
     dispatch({
       type: ORDER_ACTION_TYPES.ADD_ORDER,
       data: product,
     });
   }
 
-  function removeProductFromOrder(productId: number) {
-    if (order.length < 2) businessOrder.current = null;
+  function removeProductFromOrder(productId: string) {
+    if (order.length < 1) branchOrder.current = '';
 
     dispatch({
       type: ORDER_ACTION_TYPES.REMOVE_ORDER,
@@ -123,30 +149,10 @@ export default function useOrder() {
     });
   }
 
-  useEffect(() => {
-    (async function () {
-      let storedOrderString = await AsyncStorage.getItem('@order');
-      let parsedStoredOrder: TOrderProduct[] = Array.from(JSON.parse(storedOrderString || '[]'));
-      const validOrder = parsedStoredOrder.filter((order) => Object.hasOwn(order, 'name')); 
-      if (!validOrder.length) return;
-      businessOrder.current = validOrder[0].branchId;
-      dispatch({
-        type: ORDER_ACTION_TYPES.SET_ORDER,
-        data: validOrder,
-      });
-    })()
-  }, []);
-
-  useEffect(() => {
-    orderSubtotal = order.reduce((prev, current) => prev + (current.price * current.quantity), 0);
-    setSubtotal(orderSubtotal);
-    AsyncStorage.setItem('@order', JSON.stringify(order));
-  }, [order]);
-
   return { 
     order, 
     orderSubtotal: subtotal, 
-    businessOrder: businessOrder.current,
+    branchOrder: branchOrder.current,
     clearOrder,
     addProductToOrder, 
     removeProductFromOrder, 

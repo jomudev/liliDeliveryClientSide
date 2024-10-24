@@ -6,18 +6,12 @@ import { ThemedView } from "./ThemedView";
 import toCurrency from "@/util/toCurrency";
 import { MaterialIcons } from "@expo/vector-icons";
 import { Link } from "expo-router";
+import React from "react";
+import { TBusiness } from "@/contexts/businessCtx";
 
-export type BusinessCardProps = {
-  id: number,
-  name: string;
-  description: string;
-  businessId: number;
-  averageDeliveryTime: number,
-  deliveryPrice: number,
-  imageURL: string,
-};
+export type BusinessCardProps = TBusiness;
 
-export default function BusinessCard ({
+export default function BranchCard ({
   id,
   businessId,
   name,
@@ -28,7 +22,12 @@ export default function BusinessCard ({
 }: BusinessCardProps) {
 
   return (
-    <Link asChild href={`/businessCatalog/${id}`}>
+    <Link asChild href={{
+      pathname: `/(app)/(tabs)/(explore)/branchScreen`,
+      params: {
+        branchId: id,
+      }
+    }} >
       <Pressable 
         style={styles.container}>
         <Image src={imageURL} style={styles.backgroundImage}/>
@@ -41,13 +40,13 @@ export default function BusinessCard ({
             </ThemedText>
           </ThemedView>
         <BlurView intensity={60} tint={'dark'} style={[styles.businessDetails, styles.averageDeliveryTime]}>
-          <ThemedText style={styles.averageDeliveryTimeText} type={'defaultSemiBold'} lightColor="white" darkColor="white">
+          <ThemedText style={styles.averageDeliveryTimeText} lightColor="white" darkColor="white">
             { averageDeliveryTime } min
           </ThemedText>
-          <MaterialIcons style={styles.deliveryTimeIcon} name={'delivery-dining'} size={28} color={"#fff"}/>
-        </BlurView>
-        <BlurView intensity={60} tint={'dark'} style={[styles.businessDetails, styles.deliveryPrice]}> 
-          <ThemedText style={styles.deliveryPriceText} type={'defaultSemiBold'} lightColor="white" darkColor="white">
+          <ThemedText>
+            •
+          </ThemedText>
+          <ThemedText style={styles.deliveryPriceText} lightColor="white" darkColor="white">
             { toCurrency(deliveryPrice) }
           </ThemedText>
         </BlurView>
@@ -100,11 +99,11 @@ const styles = StyleSheet.create({
     position: 'absolute',
     width: 'auto',
     minWidth: 50,
-    flexDirection: 'row-reverse',
-    height: 50,
-    alignContent: 'center',
-    justifyContent: 'center',
+    flexDirection: 'row',
+    gap: 4,
+    minHeight: 50,
     bottom: 8,
+    alignItems: 'center',
     borderRadius: 18,
     padding: 8,
     overflow: 'hidden',
@@ -121,15 +120,16 @@ const styles = StyleSheet.create({
     right: 8,
   },
   averageDeliveryTimeText: {
-    textAlign: 'center',
+    fontSize: 16, 
     textAlignVertical: 'center',
   },
   deliveryPriceText: {
-    textAlign: 'center',
+    fontSize: 16,
     textAlignVertical: 'center',
   },
   deliveryTimeIcon: {
     textAlign: 'center',
-    alignSelf: 'center',
+    textAlignVertical: 'center',
+    alignItems: 'center',
   },
 });

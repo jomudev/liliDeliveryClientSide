@@ -1,12 +1,12 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { TUserData } from '@/apis/firebase';
-import auth from '@react-native-firebase/auth'
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import auth from '@react-native-firebase/auth';
 import databaseAPI from '@/apis/databaseAPI';
-import { Alert, Platform } from 'react-native';
+import { Platform } from 'react-native';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import clientIdGetter from './clientIdManager';
 import feedback from './feedback';
+import toJSON from './toJSON';
 const clientsId = clientIdGetter();
 
 export type TErrorMessage = {
@@ -14,47 +14,56 @@ export type TErrorMessage = {
   message: string,
 }
 
-let googleCredential;
-
 export default function useSignIn () {
   const [user, setUser] = useState<TUserData | null>(null);
-  const [isLoading, setIsLoading] = useState<Boolean>(true);
-  const [isGoogleConfigured, setIsGoogleConfigured] = useState(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  useEffect(() => {
-    GoogleSignin.configure({
-      webClientId: clientsId.clientId,
-    });
-    setIsGoogleConfigured(true);
-    console.log("waiting for auth state change...");
-    const unsubscribe = auth().onAuthStateChanged((authUser: TUserData | null) => {
-      setUser(authUser);
-      console.info(`auth state change: setting cloud user in ${Platform.OS}: ${JSON.stringify(authUser?.email, null, 2)}`);
-      if (isLoading) setIsLoading(false);
-      if (authUser) databaseAPI().createUser(authUser);
-    })
-    return unsubscribe;
-  }, []);
-
-  const signInWithGoogle = async () => {
-    if (!isGoogleConfigured) {
-      feedback("Google Sign-in is not configured yet, contact the app Owner");
-      return;
-    }
+  const configureSignIn = useCallback(() => {
     try {
-      setIsLoading(true);
-      await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
-      const { idToken } = await GoogleSignin.signIn();
-      googleCredential = auth.GoogleAuthProvider.credential(idToken);
-      const authUser = await auth().signInWithCredential(googleCredential);
-      setUser(authUser.user);
-      setIsLoading(false);
-    } catch (err: any) {
-      if (err.code == -5) return;
+      GoogleSignin.configure({
+        webClientId: clientsId.clientId,
+      });
+    } catch (err) {
       feedback(`🤔 Something weird is happening here, please contact for support...`);
       console.error(`Google Sign-in ${err}`);
     }
-  }
+  }, [clientsId]);
+
+  const handleAuthOnMount = useCallback(() => {
+    configureSignIn();
+    const unsubscribe = auth().onAuthStateChanged((authUser: TUserData | null) => {
+      setUser(authUser);
+      console.info(`Auth state change: setting cloud user in ${Platform.OS}: ${toJSON(authUser)}`);
+      if (authUser) {
+        databaseAPI().createUser(authUser);
+      }
+      setIsLoading(false);
+    });
+    return unsubscribe; // Ensuring the cleanup happens properly
+  }, []);
+
+  useEffect(() => {
+    console.info('Waiting for auth state change...');
+    const unsubscribe = handleAuthOnMount();
+    return () => unsubscribe(); // Cleanup auth state listener on unmount
+  }, []);
+
+  const signInWithGoogle = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
+      const { idToken } = await GoogleSignin.signIn();
+      const googleCredential = auth.GoogleAuthProvider.credential(idToken);
+      const authUser = await auth().signInWithCredential(googleCredential);
+      setUser(authUser.user);
+    } catch (err: any) {
+      if (err.code == -5) return;
+      feedback(`🤔 Something weird is happening here, please contact for support...`);
+      console.log(`Google Sign-in ${err}`);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [])
 
   const signInWithApple = async () => {
     feedback('sign-in with apple');
@@ -69,28 +78,5 @@ export default function useSignIn () {
     }
   }
 
-  return { user, isLoading, signInWithGoogle, signInWithApple, logout };
+  return { user, isLoading: isLoading, signInWithGoogle, signInWithApple, logout };
 };  
-
-/**
- * 
- * const [accessToken, setAccessToken] = useState(null);
-  const [request, response, promptAsync] = Google.useIdTokenAuthRequest({...clientsId});
-
-const clientsId = clientIdGetter();
-
-  useEffect(() => {
-    if (Boolean(response) && response?.type === "success") {
-      setAccessToken(response.authentication.accessToken);
-      accessToken && fetchUserInfo();
-    }
-  }, [response, accessToken]);
-
-  async function fetchUserInfo() {
-    let response = await fetch("https://www.googleapis.com/userinfo/v2/me", {
-      headers: { Authorization: `Bearer ${accessToken}` }
-    });
-    const userInfo = await response.json();
-    setUser(userInfo);
-  } 
- */

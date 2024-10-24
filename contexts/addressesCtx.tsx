@@ -1,5 +1,5 @@
 import useAddresses, { TAddress } from "@/hooks/useAddresses";
-import React, { createContext, PropsWithChildren, useEffect } from "react";
+import React, { createContext, PropsWithChildren, useCallback, useEffect } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export const AddressesContext = createContext<{
@@ -32,32 +32,31 @@ export default function AddressesProvider ({ children }: PropsWithChildren) {
     unselectAddress,
   } = useAddresses();
 
-  useEffect(() => {
-    (async function() {
-      let storedAddressesString = await AsyncStorage.getItem('@addresses'); 
-      let parsedStoredAddresses: TAddress[] = Array.from(JSON.parse(storedAddressesString || '[]'));
-      const validAddresses = parsedStoredAddresses.filter((address) => Object.hasOwn(address, 'name')); 
-      setAddresses(validAddresses);
-      let storedSelectedAddress = await AsyncStorage.getItem('@selectedAddress');
-      console.log('SELECTED ADDRESS', storedSelectedAddress);
-      if (storedSelectedAddress) {
-        selectAddress(storedSelectedAddress);
-      }
-    })()
-  }, []);
-
-  useEffect(() => {
-    AsyncStorage.setItem('@addresses', JSON.stringify(addresses));
+  const saveAddresses = useCallback(async () => {
+    await AsyncStorage.setItem('@addresses', JSON.stringify(addresses));
   }, [addresses]);
 
-  function handleAddAddress (address: TAddress) {
-    addAddress(address);
-  }
+  const getSelectedAddress = useCallback(async () => {
+    let storedSelectedAddress = await AsyncStorage.getItem('@selectedAddress');
+    if (storedSelectedAddress) {
+      selectAddress(storedSelectedAddress);
+    } else {
+      if (addresses.length > 0) {
+        selectAddress(addresses[0]?.id);
+        AsyncStorage.setItem('@selectedAddress', addresses[0]?.id);
+      }
+    }
+  }, [addresses]);
+
+  useEffect(() => {
+    saveAddresses();
+    getSelectedAddress();
+  }, [addresses]);
 
   return (
     <AddressesContext.Provider value={{
       addresses,
-      addAddress: handleAddAddress,
+      addAddress,
       modifyAddress,
       removeAddress,
       selectedAddress,

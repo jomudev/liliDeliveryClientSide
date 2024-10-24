@@ -1,37 +1,45 @@
-import { Pressable, StyleSheet, View } from "react-native";
+import { Pressable, StyleSheet } from "react-native";
 import { ThemedView } from "./ThemedView";
 import { Image } from "./Image";
 import { ThemedText } from "./ThemedText";
 import toCurrency from "@/util/toCurrency";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import BlurView from "./BlurView";
-import { TOrderProduct } from "@/hooks/useOrders";
-import { TProduct } from "@/hooks/useCatalog";
+import React from "react";
+import { Link } from "expo-router";
+import { TComplement } from "@/app/(app)/addComplement";
+import { Text } from "react-native";
 
 export type ProductProps = {
-  id: number,
+  id: string,
   name: string;
   description: string;
+  branchId: string;
   price: number;
   imageURL: string;
-  handleAddToCart: (product: TProduct) => void;
 };
 
-export default function Product({  name, price, description, imageURL, handleAddToCart }: ProductProps) {
-
+export default function Product({ branchId, id, name, price, description, imageURL }: ProductProps) {
   return (
     <ThemedView style={styles.container}>
       <Image src={imageURL} style={styles.productImage}/>
       <ThemedView style={styles.productContent}>
         <BlurView style={styles.productFooter}>
-          <ThemedText style={styles.productName}> 
-            <ThemedText type='defaultSemiBold'> { toCurrency(price) } </ThemedText>
+          <Text ellipsizeMode="tail" numberOfLines={1} style={styles.productDescription}>  
+            <ThemedText style={styles.productDescription} type='defaultSemiBold'> { toCurrency(price) } </ThemedText>
             | { name } 
-          </ThemedText>
-          <Pressable onPress={ () => {
-            handleAddToCart();
-          }} style={styles.addToCartButton} >
-            <MaterialCommunityIcons name='cart-outline' size={24} color={'white'} />
+          </Text>
+          <Pressable  
+            style={styles.addToCartButton} >
+              <Link push href={{
+                  pathname: `/(app)/addComplement`,
+                  params: {
+                    branchId, 
+                    productId: id,
+                  },
+                  }}  > 
+                <MaterialCommunityIcons name='cart-outline' size={24} color={'white'} />
+              </Link>
           </Pressable>
         </BlurView>
       </ThemedView>
@@ -62,8 +70,9 @@ const styles = StyleSheet.create({
     height: '100%',
     padding: 8,
   },
-  productName: {
+  productDescription: {
     paddingVertical: 6,
+    flex: 1,
   },
   productFooter: {
     position: 'absolute',

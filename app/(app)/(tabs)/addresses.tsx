@@ -21,8 +21,6 @@ export default function AddressesScreen () {
   } = useContext(AddressesContext);
   const theme = useColorScheme() || 'light';
 
-  console.log('ADDRESSES', addresses, addresses.length);
-
   return (
     <ThemedView style={styles.container}>
       <ScrollView>
