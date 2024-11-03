@@ -1,9 +1,10 @@
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
+import React from 'react';
 import { useState } from 'react';
 import { ActivityIndicator, GestureResponderEvent, Pressable, PressableProps, StyleSheet } from 'react-native';
 
-export default function Button ({ children, style, isLoading,  onPress, ...otherProps }: PressableProps & { isLoading: boolean }) {
+export default function Button ({ children, style, isLoading,  onPress, ...otherProps }: PressableProps & { isLoading?: boolean }) {
   const theme = useColorScheme() ?? 'light';
 
   const handlePressButton = () => {

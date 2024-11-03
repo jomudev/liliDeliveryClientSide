@@ -10,7 +10,7 @@ import useAddressForm from "@/hooks/useAddressForm";
 import { ThemedText } from "@/components/ThemedText";
 import { StyledLinkStyles } from "@/components/StyledLink";
 import addressAPI, { emptyGeocodeResult, GeocodeResult, TAddressComponent } from "@/apis/addressAPI";
-import { useNavigation } from "expo-router";
+import { Stack, useNavigation } from "expo-router";
 import { AddressesContext } from "@/contexts/addressesCtx";
 import React from "react";
 import UID from "@/util/UID";
@@ -101,15 +101,18 @@ export default function addAddressScreen () {
       );
     const address = addressWithMostComponents || emptyGeocodeResult;
     const { street, streetNumber, neighborhood, city, apt, zipCode, state } = getAddressComponents(address);
-    let streetAddress = streetNumber.trim();
-    streetAddress += (Boolean(street.trim() && Boolean(streetNumber.trim())) 
-      ? ',' : '') + street.trim();
-    streetAddress += (Boolean(neighborhood.trim() && (Boolean(street.trim()) || Boolean(streetNumber.trim()))) ? ',' :  '') + neighborhood.trim();
-    streetAddress = streetAddress.trim();
+    let addressLine = streetNumber.trim();
+    addressLine += (Boolean(street.trim()) ? ', ' : '') + street.trim();
+    addressLine += (Boolean(apt.trim()) ? ', ' : '') + apt.trim();
+    addressLine += (Boolean(neighborhood.trim()) ? ', ' :  '') + neighborhood.trim();
+    addressLine += (Boolean(zipCode.trim()) ? ', ' : '') + zipCode.trim();
+    addressLine += (Boolean(city.trim()) ? ', ' : '') + city.trim();
+    addressLine += (Boolean(state.trim()) ? ', ' : '') + state.trim();
+    addressLine = addressLine.trim();
       
     setAddress({
       addressAlias,
-      streetAddress,
+      streetAddress: street,
       apt: apt,
       city: city,
       zipCode: zipCode,
@@ -146,67 +149,70 @@ export default function addAddressScreen () {
   }
 
   return (
-    <Container>
-      <ScrollView>
-        <MapView 
-          style={styles.map}
-          initialRegion={region}
-          provider={ PROVIDER_GOOGLE }
-          onRegionChange={({ latitude, longitude }: Region) => setRegion((prevRegion: Region): Region => {
-            if (latitude != prevRegion.latitude || longitude != prevRegion.longitude) {
-              return ({
-                ...prevRegion,
-                latitude,
-                longitude,
-              })
-            }
-            return prevRegion;
-          })}
-          onTouchEnd={() => handleSetAddress({
-            latitude: region.latitude,
-            longitude: region.longitude,
-          })}
-          >
-            <Marker
-              coordinate={{
-                longitude: region.longitude,
-                latitude: region.latitude,
-              }}
-              />
-          </MapView>
-        <Input placeholder="Alias" value={addressAlias} onChangeText={setAddressAlias} />
-        <Input textContentType="streetAddressLine1" placeholder="Street Address" value={streetAddress} onChangeText={setStreetAddress} />
-        <Input textContentType="streetAddressLine2" placeholder="Apt, Suit, or unit" value={apt} onChangeText={setApt} />
-        <Input textContentType="addressCity" placeholder="City" value={city} onChangeText={setCity} />
-        <View style={styles.horizontalGroup} >
-          <Input textContentType="addressState" placeholder="State" style={styles.groupInput} value={countryState} onChangeText={setCountryState} />
-          <Input placeholder="Zip Code" style={styles.groupInput} value={zipCode} onChangeText={setZipCode} />
-        </View>
-        <Input placeholder="User Note" value={userNote} onChangeText={setUserNote} />
-          <Pressable 
-            style={StyledLinkStyles} 
-            onPress={() => {
-              addAddress({
-                id: UID().generate(),
-                name: addressAlias,
-                address: streetAddress.trim() + ' ' + apt.trim() + ' ' + zipCode.trim() + city.trim() + ' ' + countryState.trim() + ' ', 
-                userNote: userNote,
-                longitude: region.longitude,
-                latitude: region.latitude,
-                city: city.trim(),
-                state: countryState.trim(),
-                zip: zipCode.trim(),
-                addressLine1: streetAddress.trim(),
-                addressLine2: apt.trim(), 
-              });
-              navigation.goBack();
-            }} >
-            <ThemedText>
-              Save this address
-            </ThemedText>
-          </Pressable>
-      </ScrollView>
-    </Container>
+    <>
+      <Stack.Screen options={{ headerTitle: 'Add Address', headerBackTitle: 'Back' }} />
+      <Container>
+        <ScrollView>
+          <MapView 
+            style={styles.map}
+            initialRegion={region}
+            provider={ PROVIDER_GOOGLE }
+            onRegionChange={({ latitude, longitude }: Region) => setRegion((prevRegion: Region): Region => {
+              if (latitude != prevRegion.latitude || longitude != prevRegion.longitude) {
+                return ({
+                  ...prevRegion,
+                  latitude,
+                  longitude,
+                })
+              }
+              return prevRegion;
+            })}
+            onTouchEnd={() => handleSetAddress({
+              latitude: region.latitude,
+              longitude: region.longitude,
+            })}
+            >
+              <Marker
+                coordinate={{
+                  longitude: region.longitude,
+                  latitude: region.latitude,
+                }}
+                />
+            </MapView>
+          <Input placeholder="Alias" value={addressAlias} onChangeText={setAddressAlias} />
+          <Input textContentType="streetAddressLine1" placeholder="Street Address" value={streetAddress} onChangeText={setStreetAddress} />
+          <Input textContentType="streetAddressLine2" placeholder="Apt, Suit, or unit" value={apt} onChangeText={setApt} />
+          <Input textContentType="addressCity" placeholder="City" value={city} onChangeText={setCity} />
+          <View style={styles.horizontalGroup} >
+            <Input textContentType="addressState" placeholder="State" style={styles.groupInput} value={countryState} onChangeText={setCountryState} />
+            <Input placeholder="Zip Code" style={styles.groupInput} value={zipCode} onChangeText={setZipCode} />
+          </View>
+          <Input placeholder="User Note" value={userNote} onChangeText={setUserNote} />
+            <Pressable 
+              style={StyledLinkStyles} 
+              onPress={() => {
+                addAddress({
+                  id: UID().generate(),
+                  name: addressAlias,
+                  address: streetAddress.trim() + ' ' + apt.trim() + ' ' + zipCode.trim() + city.trim() + ' ' + countryState.trim() + ' ', 
+                  userNote: userNote,
+                  longitude: region.longitude,
+                  latitude: region.latitude,
+                  city: city.trim(),
+                  state: countryState.trim(),
+                  zip: zipCode.trim(),
+                  addressLine1: streetAddress.trim(),
+                  addressLine2: apt.trim(), 
+                });
+                navigation.goBack();
+              }} >
+              <ThemedText>
+                Save this address
+              </ThemedText>
+            </Pressable>
+        </ScrollView>
+      </Container>
+    </>
   );
 }
 

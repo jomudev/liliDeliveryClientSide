@@ -1,38 +1,39 @@
 import { useCatalog } from "@/hooks/useCatalog";
 import LoadingIndicator from "./LoadingIndicator";
 import { ThemedView } from "./ThemedView";
-import Category from "./Category";
-import { ScrollView } from "react-native";
-import { ThemedText } from "./ThemedText";
+import Category, { LoadMoreButton } from "./Category";
 import UID from "@/util/UID";
-import React from "react";
+import React, { useRef } from "react";
+import CenteredText from "./CenteredText";
+import { useLocalSearchParams } from "expo-router";
+import ProductsAPI from "@/apis/ProductsAPI";
 
 export type CatalogProps = {
   branchId: string,
 };
 
-export default function Catalog ({ branchId }: CatalogProps) {
-  const { catalog, categoryId, isLoading } = useCatalog(branchId);
+export default function Catalog () {
+  const { branchId } = useLocalSearchParams();
+  const { catalog, isLoading, loadMoreProducts } = useCatalog(branchId.toString()); 
+  const page = useRef(2);
+
   if (isLoading) return <LoadingIndicator />
   return (
     <ThemedView>
-      <ScrollView style={{ flexDirection: 'row', marginBottom: 24}} horizontal>
-        {
-          Object.keys(catalog).length > 1 && Object.keys(catalog).map((categoryName) => (
-            <ThemedText key={UID().generate()}>{ categoryName }</ThemedText>
-          ))
-        }
-      </ScrollView>
+       {
+        Object.entries(catalog).map(([category, products]) => 
+          <Category key={UID().generate()} name={category} products={products}/>
+        )
+       }
       {
-        Object.keys(catalog).map((category: string) => (
-          <ThemedView key={categoryId[category]}>
-            <Category name={category} branchId={branchId} products={catalog[category]}/>
-          </ThemedView>
-        ))
+        !Boolean(Object.keys(catalog).length) && <CenteredText> 😨 No Products Here </CenteredText>
       }
-      {
-        !Boolean(Object.keys(catalog).length) && <ThemedText> 😨 No Products Here </ThemedText>
-      }
+      <LoadMoreButton 
+        onPress={
+          async () => 
+            page.current = await loadMoreProducts(branchId.toString(), page.current)
+          } 
+          />
      </ThemedView>
     )
 };

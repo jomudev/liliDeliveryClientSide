@@ -7,22 +7,21 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import BlurView from "./BlurView";
 import React from "react";
 import { Link } from "expo-router";
-import { TComplement } from "@/app/(app)/addComplement";
+
 import { Text } from "react-native";
 
 export type ProductProps = {
   id: string,
   name: string;
-  description: string;
   branchId: string;
   price: number;
   imageURL: string;
 };
 
-export default function Product({ branchId, id, name, price, description, imageURL }: ProductProps) {
+export default function Product({ branchId, id, name, price, imageURL }: ProductProps) {
   return (
     <ThemedView style={styles.container}>
-      <Image src={imageURL} style={styles.productImage}/>
+      <Image src={imageURL} style={styles.productImage} />
       <ThemedView style={styles.productContent}>
         <BlurView style={styles.productFooter}>
           <Text ellipsizeMode="tail" numberOfLines={1} style={styles.productDescription}>  
@@ -37,7 +36,11 @@ export default function Product({ branchId, id, name, price, description, imageU
                     branchId, 
                     productId: id,
                   },
-                  }}  > 
+                  }}
+                  style={{
+                    flex: 1,
+                  }}
+                  > 
                 <MaterialCommunityIcons name='cart-outline' size={24} color={'white'} />
               </Link>
           </Pressable>

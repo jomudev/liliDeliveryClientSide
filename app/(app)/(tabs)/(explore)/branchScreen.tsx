@@ -3,7 +3,7 @@ import LoadingIndicator from "@/components/LoadingIndicator";
 import ParallaxScrollView from "@/components/ParallaxScrollView";
 import ParallaxViewHeader from "@/components/ParallaxViewHeader";
 import { TBusiness } from "@/contexts/businessCtx";
-import { useLocalSearchParams } from "expo-router";
+import { Stack, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
 import { StyleSheet } from "react-native";
 import { Image } from "@/components/Image";
@@ -11,10 +11,12 @@ import Catalog from "@/components/Catalog";
 import { ThemedView } from "@/components/ThemedView";
 import React from "react";
 
-export function useBranchInfo(branchId: number) {
+export function useBranchInfo(branchId: number | null) {
   const [branchInfo, setBusinessInfo] = useState<TBusiness | null>();
+
   useEffect(() => {
     (async function () {
+      if (!branchId) return;
       const apiResponse = await databaseAPI().getBusinessInfo(branchId);
       setBusinessInfo(apiResponse);
     })();
@@ -22,35 +24,38 @@ export function useBranchInfo(branchId: number) {
   return branchInfo;
 }
 
-export default function businessCatalog() {
+export default function BranchScreen() {
   const { branchId }: { branchId: string } = useLocalSearchParams();
   const branchInfo = useBranchInfo(parseInt(branchId));
 
-  if (!branchInfo) return <LoadingIndicator />;
+  if (!branchInfo) return <LoadingIndicator loadingText="Loading Business Info..." />;
 
   return (
-    <ParallaxScrollView
-      showBackButton
-      headerBackgroundColor={{ light: '#FFE37E', dark: '#FF7D70' }}
-      headerImage={
-        <Image 
+    <>
+      <Stack.Screen options={{ headerShown: false }} />
+      <ParallaxScrollView
+        showBackButton
+        headerBackgroundColor={{ light: '#FFE37E', dark: '#FF7D70' }}
+        headerImage={
+          <Image 
           src={branchInfo.imageURL} 
           style={styles.headerImage}
           />
-      }
-      headerContent={ 
-        <ParallaxViewHeader 
+        }
+        headerContent={ 
+          <ParallaxViewHeader 
           title={`🏬 ${branchInfo.name}`} 
           subtitle={Boolean(branchInfo.description) ? `✨ ${branchInfo.description}` : ''}
           lightColor='white'
           darkColor='white'
           />
-      }
-      >
-        <ThemedView style={styles.container}>
-          <Catalog branchId={branchId} />
-        </ThemedView>
-    </ParallaxScrollView>
+        }
+        >
+          <ThemedView style={styles.container}>
+            <Catalog />
+          </ThemedView>
+      </ParallaxScrollView>
+    </>
   );
 }
 

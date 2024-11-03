@@ -4,24 +4,36 @@ import { GoogleSigninButton } from '@react-native-google-signin/google-signin';
 import React, { useContext, useEffect } from "react";
 import { AuthContext } from "@/contexts/authCtx";
 import LiliLogo from '@/assets/images/lilisdeliveryLogo.jpeg';
-import { Redirect, SplashScreen } from 'expo-router';
+import { Redirect, router, SplashScreen, Stack } from 'expo-router';
 import LoadingIndicator from '@/components/LoadingIndicator';
 
 SplashScreen.preventAutoHideAsync();
 
 export default function SignInScreen() {
-  const { signIn } = useContext(AuthContext);
+  const { user, isLoading, signIn } = useContext(AuthContext);
+
+  if (isLoading) return <LoadingIndicator loadingText={'Logging in ...'} /> 
+
+  if (user) return <Redirect href={'/(tabs)'}  />
+
+  useEffect(() => {
+    if (isLoading) return;
+    SplashScreen.hideAsync();
+  }, [isLoading]);
  
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.signInForm}>
-        <Image source={LiliLogo} style={styles.logo} />
-        <GoogleSigninButton 
-          onPress={ () => signIn('google') }
-          size={GoogleSigninButton.Size.Standard}
-        />  
-      </View>
-    </SafeAreaView>
+    <>
+      <Stack.Screen options={{ title: 'Sign In' }} />
+      <SafeAreaView style={styles.container}>
+        <View style={styles.signInForm}>
+          <Image source={LiliLogo} style={styles.logo} />
+          <GoogleSigninButton 
+            onPress={ () => signIn('google') }
+            size={GoogleSigninButton.Size.Standard}
+          />  
+        </View>
+      </SafeAreaView>
+    </>
   );
 }
 

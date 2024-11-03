@@ -6,179 +6,141 @@ import { TOrder, TOrderProduct } from "@/hooks/useOrders";
 import { TAddress } from "@/hooks/useAddresses";
 import { TGroupedComplements } from "@/app/(app)/addComplement";
 import feedback from "@/util/feedback";
+import { TOrderData } from "@/hooks/usePayment";
 
-let domain = "https://delivery-test-backend.vercel.app";
+const apiURL = process.env.NODE_ENV === 'development' && Platform.OS === 'android' 
+  ? "http://10.0.2.2:3000" 
+  : process.env.NODE_ENV === 'development' 
+  ? "http://127.0.0.1:3000" 
+  : "https://delivery-test-backend.vercel.app";
 
-if (process.env.NODE_ENV == 'development') {
-  domain = Platform.OS == 'android' ? "http://10.0.2.2:3000" : "http://127.0.0.1:3000";
-}
-
-const apiURL = domain;
-
-let route : string;
-let apiResponse: any;
 export async function apiFetch<T>(pathName: string, options?: RequestInit): Promise<T | null> {
-  if (pathName[0] !== "/") {
-    pathName = "/" + pathName;
-  }
-  route = apiURL + pathName;
-  console.info(`making request to ${route}`);
+  const route = `${apiURL}/${pathName.startsWith('/') ? pathName.slice(1) : pathName}`;
+  console.info(`Requesting: ${route}`);
+
   try {
-    apiResponse = await (await fetch(route, {
+    const response = await fetch(route, {
       method: 'GET',
-      ...options,
       headers: {
         Accept: 'application/json',
         "Content-Type": 'application/json',
       },
-    })).json();
-    if (Object.hasOwn(apiResponse, 'errorMessage')) {
-      throw new Error(apiResponse.errorMessage, { cause: apiResponse.errorMessage });
-    }
-    console.info(`response for ${route}: \n${JSON.stringify(apiResponse, null, 2)}`);
-    return apiResponse || null;
-  } catch (err) {
-    console.error(`response for ${route}: \n${err}`);
-    throw err;
-  }
-};
+      ...options,
+    });
 
-export default function () {
+    const data = await response.json();
+
+    if ('errorMessage' in data) {
+      throw new Error(data.errorMessage);
+    }
+
+    console.info(`Response from ${route}: ${JSON.stringify(data, null, 2)}`);
+    return data || null;
+
+  } catch (error) {
+    console.error(`Error in request to ${route}:`, error);
+    feedback(`Error: Could not connect to the server. Please try again later.`);
+    return null;
+  }
+}
+
+export default function useApi() {
   return {
     async getProduct(productId: string): Promise<TProduct | null> {
-      try {
-        return await apiFetch(`/products/${productId}`);
-      } catch (err) {
-        console.error(`😨 Error trying to get product info`, err);
-        return null;
-      }
+      return apiFetch<TProduct>(`/products/${productId}`);
     },
-    async createUser (user: TUserData) {
-      try {
-        return await apiFetch("/api/createUser", {
-          method: 'POST',
-          body: JSON.stringify({
-            uid: user?.uid,
-            phone: user?.phoneNumber,
-          }),
-        });
-      } catch (err) {
-        //feedback(`😨 Error trying to create the user: ${err}`)
-        return null;
-      }
-    },  
+
+    async createUser(user: TUserData): Promise<void> {
+      await apiFetch("/api/createUser", {
+        method: 'POST',
+        body: JSON.stringify({
+          uid: user.uid,
+          phone: user.phoneNumber,
+        }),
+      });
+    },
+
     async getBusiness(): Promise<TBusiness[]> {
-      try {
-        return (await apiFetch<TBusiness>('/api/business')) || [];
-      } catch (err) {
-        console.error(`😨 Connection error, check your internet connection`, err);
-        return [];
-      }
+      return (await apiFetch<TBusiness[]>('/api/business')) || [];
     },
 
     async getBusinessInfo(businessId: number): Promise<TBusiness | null> {
-      try {
-        return await apiFetch<TBusiness>(`/api/business/${businessId}`);
-      } catch (err) {
-        console.error(`😨 Connection error, check your internet connection`, err);
-        return null;
-      }
+      return apiFetch<TBusiness>(`/api/business/${businessId}`);
     },
 
-    async getBusinessCategories(businessId: string) {
-      try {
-        return await apiFetch(`/api/categories/${businessId}`);
-      } catch (err) {
-        console.error(`😨Error trying to get database category info`, err);
-        return [];
-      }
+    async getBusinessCategories(businessId: string): Promise<any[]> {
+      return (await apiFetch<any[]>(`/api/categories/${businessId}`)) || [];
     },
 
-    async getCategoryProducts(categoryId: string, businessId: string) {
-      try {
-        return await apiFetch(`/api/products/${categoryId}`, {
-          method: 'POST',
-          body: JSON.stringify({ businessId }),
-        });
-      } catch (err) {
-        console.error(`😨Error trying to get database category products`, err);
-        return [];
-      }
+    async getCategoryProducts(categoryId: string, businessId: string): Promise<TProduct[]> {
+      return (await apiFetch<TProduct[]>(`/api/products/${categoryId}`, {
+        method: 'POST',
+        body: JSON.stringify({ businessId }),
+      })) || [];
     },
 
     async getBusinessProducts(businessId: string): Promise<TProduct[]> {
-      try {
-        const apiResponseProducts = await apiFetch<TProduct[]>(`/api/products/${businessId}`);
-        return apiResponseProducts;
-      } catch(err) {
-        console.error(`Check your network signal...`, err);
+      return (await apiFetch<TProduct[]>(`/api/products/${businessId}`, {
+        method: 'POST',
+        body: JSON.stringify({ 
+          page: 1,
+          length: 10,
+         }),
+      })) || [];
+    },
+
+    async savePendingOrder(order: TOrder): Promise<void> {
+      const response = await apiFetch('/orders/createOrder', {
+        method: 'POST',
+        body: JSON.stringify(order),
+      });
+
+      if (response && 'errorMessage' in response) {
+        console.error(`Save Order Error: ${response.errorMessage}`);
+      }
+    },
+
+    async createOrder(orderData: TOrderPaymentData): Promise<void> {
+      if (!orderData.orderTotal || !orderData.order || !orderData.userId || !orderData.branchId || !orderData.paymentIntent) {
+        throw new Error('Missing required order data');
+      }
+
+      const response = await apiFetch('/orders/createOrder', {
+        method: 'POST',
+        body: JSON.stringify(orderData),
+      });
+
+      if (response && 'errorMessage' in response) {
+        throw new Error(`Order Creation Error: ${response.errorMessage}`);
+      }
+    },
+
+    async getPendingOrders(userId: string): Promise<any[]> {
+      const response = await apiFetch<any[]>(`/orders/${userId}/pending`);
+
+      if (response && 'errorMessage' in response) {
+        console.error(`Get Pending Orders Error: ${response.errorMessage}`);
         return [];
       }
+      
+      return response;
     },
 
-    async savePendingOrder(order: TOrder) {
-      try {
-        const apiResponse = await apiFetch('orders/createOrder');
-        if (Object.hasOwn(apiResponse, 'errorMessage')) {
-          throw new Error('an error has ocurred' + apiResponse.errorMessage);
-        }
-      } catch (err) {
-        console.log('api error', err);        
-      }
-    },
-
-    async createOrder(orderData: {
-      paymentIntent: string,
-      order: TOrderProduct[],
-      orderTotal: number,
-      shippingAddress: TAddress | null,
-      shippingComment: string,
-      shippingContact: string,
-      userId: string,
-      branchId: string | null, 
-    }) {
-      if (!orderData.orderTotal) throw new Error('order total is required');
-      if (!orderData.order) throw new Error('order is required');
-      if (!orderData.userId) throw new Error('user id is required');
-      if (!orderData.branchId) throw new Error('branch id is required');
-      if (!orderData.paymentIntent) throw new Error('payment intent is required');
-      try {
-        const apiResponse = await apiFetch('orders/createOrder', {
-          method: 'POST',
-          body: JSON.stringify(orderData),
-        });
-        if (Object.hasOwn(apiResponse, 'errorMessage')) {
-          throw new Error('an error has ocurred' + apiResponse.errorMessage);
-        }
-      } catch (err) {
-        console.log('api error', err);
-        throw err;
-      }
-    },
-
-    getPendingOrders: async (userId: string) => {
-        try {
-          const apiResponse: any = (await apiFetch(`/orders/${userId}/pending`));
-          if (Object.hasOwn(apiResponse, 'errorMessage')) {
-            throw new Error('an error has ocurred' + apiResponse.errorMessage);
-          }
-          return apiResponse;
-        } catch (err) {
-          console.log('api error', err);
-          throw err;
-        }
-    },
-    
     async getProductComplements(productId: string): Promise<TGroupedComplements[]> {
-      try {
-        if (!productId) {
-          throw new Error('productId is required');
-        }
-        return await apiFetch(`/products/${productId}/complements`);
-      } catch (err) {
-        console.error(`😨Error trying to get database complements products`, err);
+      if (!productId) {
+        console.error('Error: Product ID is required');
         return [];
       }
-    }
+
+      const response = await apiFetch<TGroupedComplements[]>(`/products/${productId}/complements`);
+      return response || [];
+    },
+    async getOrderData(orderId: string): Promise<TOrderData> {
+      return apiFetch<TOrderData>(`/orders/${orderId}`);
+    },
   }
 }
+
+type TOrderPaymentData = TOrderData & {
+  paymentIntent: string;
+};

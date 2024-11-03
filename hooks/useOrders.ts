@@ -4,6 +4,7 @@ import { useCallback, useEffect, useReducer, useRef, useState } from "react";
 import { Alert } from "react-native";
 import { TProduct } from "./useCatalog";
 import { totalizeByProperty } from "@/util/totalizeByProperty";
+import feedback from "@/util/feedback";
 
 export type TOrderProduct = TProduct & {
   complements: TComplement[],
@@ -59,8 +60,25 @@ function orderReducer (order: TOrderProduct[], action: { type: string, data: any
 
 let orderSubtotal = 0;
 
+async function saveBranchOrder(branchOrder: string | null) {
+  if (!branchOrder) {
+    return AsyncStorage.removeItem('@branchOrder');
+  };
+  return AsyncStorage.setItem('@branchOrder', JSON.stringify(branchOrder));
+};
+
+async function getBranchOrder() {
+  try {
+    let localBranchOrder = await AsyncStorage.getItem('@branchOrder') || 'null';
+    return JSON.parse(localBranchOrder);
+  } catch (error) {
+    console.error(error);
+    return '';
+  }
+};
+
 export default function useOrder() {
-  const branchOrder = useRef<string>();
+  const branchOrder = useRef<string | null>(null);
   const [order, dispatch] = useReducer(orderReducer, []);
   const [subtotal, setSubtotal] = useState(0);
 
@@ -74,12 +92,8 @@ export default function useOrder() {
   }, []);
 
   useEffect(() => {
-      AsyncStorage.getItem('@branchOrder').then(localBranchOrder => {
-        if (localBranchOrder?.includes('\\') || localBranchOrder?.includes('/')) {
-          localBranchOrder = localBranchOrder.replace(/([\\"])/g, ''); 
-        }
-        localBranchOrder = JSON.parse(localBranchOrder || ''); 
-        branchOrder.current = localBranchOrder || '';
+      getBranchOrder().then(localBranchOrder => {
+        branchOrder.current = localBranchOrder;
       });
       getOrder().then(validOrder => {
         dispatch({
@@ -95,6 +109,11 @@ export default function useOrder() {
     ), 0);
     setSubtotal(orderSubtotal);
     AsyncStorage.setItem('@order', JSON.stringify(order));
+    if (order.length == 0) {
+      branchOrder.current = null;
+      saveBranchOrder(null);
+    }
+    saveBranchOrder(order[0]?.branchId);
   }, [order]);
 
   function clearOrder() {
@@ -102,7 +121,7 @@ export default function useOrder() {
       type: ORDER_ACTION_TYPES.CLEAR,
       data: null,
     });
-    branchOrder.current = '';
+    branchOrder.current = null;
   }
 
   function addProductToOrder(product: TOrderProduct) {
@@ -114,6 +133,7 @@ export default function useOrder() {
           text: 'Yes, clear the cart',
           onPress: () => {
             clearOrder();
+            branchOrder.current = product.branchId;
             dispatch({
               type: ORDER_ACTION_TYPES.ADD_ORDER,
               data: product,
@@ -126,7 +146,6 @@ export default function useOrder() {
         }
       ]);
     };
-    AsyncStorage.setItem('@branchOrder', JSON.stringify(branchOrder.current));
     dispatch({
       type: ORDER_ACTION_TYPES.ADD_ORDER,
       data: product,
@@ -134,8 +153,6 @@ export default function useOrder() {
   }
 
   function removeProductFromOrder(productId: string) {
-    if (order.length < 1) branchOrder.current = '';
-
     dispatch({
       type: ORDER_ACTION_TYPES.REMOVE_ORDER,
       data: productId,

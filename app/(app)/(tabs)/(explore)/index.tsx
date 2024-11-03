@@ -10,6 +10,7 @@ import { Avatar } from '@rneui/themed';
 import { ThemedView } from '@/components/ThemedView';
 import React from 'react';
 import Branches from '@/components/Branches';
+import { Stack } from 'expo-router';
 
 export default function HomeScreen() {
   const [headerImage, setHeaderImage] = useState('');
@@ -26,22 +27,25 @@ export default function HomeScreen() {
   }, []);
 
   return (
-    <ParallaxScrollView 
-      headerBackgroundColor={{ light: '#FFE37E', dark: '#FF7D70' }}
-      headerImage={<Image
-        src={headerImage}
-        style={styles.headerImage} />}
-      headerContent={<ParallaxViewHeader
-        title={"🍔 Cravings? Consider them solved! 😋"}
-        subtitle={"🔍 Discover Your Faves! 💖"}
-        lightColor='white'
-        darkColor='white'>
-        <Avatar size={32} onPress={() => signOut()} source={{ uri: user?.photoURL }} rounded containerStyle={styles.avatar} />
-      </ParallaxViewHeader>} showBackButton={false}>
-      <ThemedView style={styles.container}>
-        <Branches />
-      </ThemedView>
-    </ParallaxScrollView>
+    <>
+      <Stack.Screen options={{ headerShown: false }} />
+      <ParallaxScrollView 
+        headerBackgroundColor={{ light: '#FFE37E', dark: '#FF7D70' }}
+        headerImage={<Image
+          src={headerImage}
+          style={styles.headerImage} />}
+        headerContent={<ParallaxViewHeader
+          title={"🍔 Cravings? Consider them solved! 😋"}
+          subtitle={"🔍 Discover Your Faves! 💖"}
+          lightColor='white'
+          darkColor='white'>
+          <Avatar size={32} onPress={() => signOut()} source={{ uri: user?.photoURL }} rounded containerStyle={styles.avatar} />
+        </ParallaxViewHeader>} showBackButton={false}>
+        <ThemedView style={styles.container}>
+          <Branches />
+        </ThemedView>
+      </ParallaxScrollView>
+    </>
   );
 }
 

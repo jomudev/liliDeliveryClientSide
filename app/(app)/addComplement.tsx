@@ -15,7 +15,7 @@ import toCurrency from "@/util/toCurrency";
 import toJSON from "@/util/toJSON";
 import UID from "@/util/UID";
 import { CheckBox } from "@rneui/themed";
-import { useLocalSearchParams, useNavigation } from "expo-router";
+import { Stack, useLocalSearchParams, useNavigation } from "expo-router";
 import React, { useContext, useEffect, useState } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 
@@ -49,7 +49,7 @@ const initSelectedComplements = (complementsGroups: TGroupedComplements[]) => {
 }; 
 
 export default function AddComplementsScreen() {
-  const { order, addProductToOrder } = useContext(OrderContext);
+  const { addProductToOrder } = useContext(OrderContext);
   const [complements, setComplements] = useState<TGroupedComplements[]>([]);
   const { productId, branchId } = useLocalSearchParams();
   const [ productData, setProductData ] = useState<TProduct | null>(null);
@@ -68,13 +68,11 @@ export default function AddComplementsScreen() {
     })();
   }, [productId]);
 
-  if (loading) return <LoadingIndicator />;
-  if (!productData) return <LoadingIndicator />;
   
   function complementIsSelected(complement: TComplement) {
     return Boolean(selectedComplements.find((selectedComplement) => selectedComplement.id == complement.id));
   };
-
+  
   function handleSelectComplement(complement: TComplement) {
     if (complement.type == 1) {
       if (selectedComplements.find((selectedComplement) => selectedComplement.id == complement.id)) {
@@ -93,10 +91,14 @@ export default function AddComplementsScreen() {
     }
     setSelectedComplements(selectedComplements.concat(complement));
   }
-
+  
   function handleFinishOrder() {
     setLoading(true);
-    if (!productData) return;
+    if (!productData) {
+      feedback('Imposible to add order, please contact support');
+      console.log('cannot add order, product data is null');
+      return;
+    }
     addProductToOrder({
       ...productData,
       id: productId.toString(),
@@ -106,71 +108,80 @@ export default function AddComplementsScreen() {
     });
     setTimeout(() => navigation.goBack(), 300);
   }
-
+  
+  if (loading) return <LoadingIndicator loadingText="Loading Side Dishes..." />;
+  if (!productData) return <LoadingIndicator />;
   return (
-    <ParallaxScrollView 
-      headerImage={productData?.imageURL || ''} 
-      showBackButton={true}
-      headerBackgroundColor={{
-      dark: "#3d3d3d",
-      light: "#dedede"
+    <>
+      <Stack.Screen options={{ headerShown: false }} />
+      <ParallaxScrollView 
+        headerImage={productData?.imageURL || ''} 
+        showBackButton={true}
+        headerBackgroundColor={{
+        dark: "#3d3d3d",
+        light: "#dedede"
 
-    }}>
-      <ThemedText type='title'>
-        { productData.name }
-      </ThemedText>
-      <ThemedText type='subtitle'>
-        { productData.description }
-      </ThemedText>
-      <ThemedText type='defaultSemiBold'>
-        Select a Side Dish 
-      </ThemedText>
-      { 
-        complements.map((complementGroup: TGroupedComplements) => (
-          <View key={UID().generate()}>
-            <ThemedText>{ complementGroup.category }</ThemedText>
-            {
-              complementGroup.complements.map((complement: TComplement) => (
-                (
-                  <Row key={UID().generate()} style={{ alignItems: 'center', justifyContent: 'space-between' }}>
-                    <View>
-                      {
-                        complement.type == 1 ? (
-                          <CheckBox 
-                            onPress={() => handleSelectComplement(complement)}
-                            checked={complementIsSelected(complement)} 
-                            checkedIcon="dot-circle-o"
-                            uncheckedIcon="circle-o" 
-                            />
-                        ) : (
-                          <CheckBox 
-                            onPress={() => handleSelectComplement(complement)}
-                            checked={complementIsSelected(complement)} 
-                            iconType="material-community"
-                            checkedIcon="checkbox-marked"
-                            uncheckedIcon="checkbox-blank-outline"
-                            checkedColor="red"
-                            />
-                        )
-                      }
-                    </View>
-                    <ThemedText>
-                      { complement.name }
-                    </ThemedText>
-                    <ThemedText >
-                      { complement.value > 0 ? `+ ${toCurrency(complement.value)}` : 'Free' }
-                    </ThemedText>
-                  </Row>
-                )
-              ))
-            }
-          </View>
-        ))
-      }
-      <StyledButton onPress={() => handleFinishOrder()} >
-        Add to Order
-      </StyledButton>
-    </ParallaxScrollView>
+      }}>
+        <ThemedText type='title'>
+          { productData.name }
+        </ThemedText>
+        <ThemedText type='subtitle'>
+          { productData.description }
+        </ThemedText>
+        {
+          complements.length > 1 && (
+            <ThemedText type='defaultSemiBold'>
+              Select a Side Dish 
+            </ThemedText>
+          )
+        }
+        { 
+          complements.map((complementGroup: TGroupedComplements) => (
+            <View key={UID().generate()}>
+              <ThemedText>{ complementGroup.category }</ThemedText>
+              {
+                complementGroup.complements.map((complement: TComplement) => (
+                  (
+                    <Row key={UID().generate()} style={{ alignItems: 'center', justifyContent: 'space-between' }}>
+                      <View>
+                        {
+                          complement.type == 1 ? (
+                            <CheckBox 
+                              onPress={() => handleSelectComplement(complement)}
+                              checked={complementIsSelected(complement)} 
+                              checkedIcon="dot-circle-o"
+                              uncheckedIcon="circle-o" 
+                              />
+                          ) : (
+                            <CheckBox 
+                              onPress={() => handleSelectComplement(complement)}
+                              checked={complementIsSelected(complement)} 
+                              iconType="material-community"
+                              checkedIcon="checkbox-marked"
+                              uncheckedIcon="checkbox-blank-outline"
+                              checkedColor="red"
+                              />
+                          )
+                        }
+                      </View>
+                      <ThemedText>
+                        { complement.name }
+                      </ThemedText>
+                      <ThemedText >
+                        { complement.value > 0 ? `+ ${toCurrency(complement.value)}` : 'Free' }
+                      </ThemedText>
+                    </Row>
+                  )
+                ))
+              }
+            </View>
+          ))
+        }
+        <StyledButton onPress={() => handleFinishOrder()} >
+          Add to Order
+        </StyledButton>
+      </ParallaxScrollView>
+    </>
   );
 }
 

@@ -1,13 +1,13 @@
-import { Pressable, useColorScheme, View } from "react-native";
+import { Pressable, View } from "react-native";
 import { ThemedText } from "../ThemedText";
 import toCurrency from "@/util/toCurrency";
-import React, { useRef, useState } from "react";
+import React from "react";
 import { StyleSheet } from "react-native";
 import { TProduct } from "@/hooks/useCatalog";
 import UID from "@/util/UID";
 import { Image } from "../Image";
 import Row from "../Row";
-import { Colors } from "@/constants/Colors";
+import { router, useNavigation } from "expo-router";
 
 // CONSTANTS
 const STATUSES: {
@@ -26,8 +26,8 @@ const BUTTON_TEXT: {
   [index: string]: string,
 } = {
   '1': 'Cancel Order',
-  '2': 'Cancel Order',
-  '3': 'Cancel Order',
+  '2': 'In Process...',
+  '3': 'In Process...',
   '4': 'View Order State',
   '5': 'View Order State',
   '6': 'Order Again',
@@ -36,6 +36,7 @@ const BUTTON_TEXT: {
 
 
 export type HistoryOrderListItemProps = {
+  id: string,
   branchName: string,
   products: TProduct[],
   date: string,
@@ -44,12 +45,27 @@ export type HistoryOrderListItemProps = {
 }
 
 export default function HistoryOrderListItem ({
+  id,
   branchName,
   products,
   date,
   total,
   status,
 }: HistoryOrderListItemProps) {
+
+  function handleViewOrderState() {
+    let NumberStatus = Number(status);
+    if (NumberStatus < 2) {
+      alert('Module not available yet');
+    } else {
+      console.log('pushing to orderStateScreen', id);
+      router.push("/(app)/orderStateScreen");
+      router.setParams({
+        orderId: id,
+      }) 
+    }
+  }
+
   return (
     <Row style={styles.container}>
       <View>
@@ -77,7 +93,7 @@ export default function HistoryOrderListItem ({
           }
         </Row>
       </View>
-      <HistoryOrderButton orderStatus={status} onPress={() => alert('Module not available yet')}  />
+      <HistoryOrderButton orderStatus={status} onPress={() => handleViewOrderState()}  />
     </Row>
   );
 }

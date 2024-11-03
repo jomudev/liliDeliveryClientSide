@@ -8,6 +8,9 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { OrderContext } from "@/contexts/orderCtx";
 import feedback from "@/util/feedback";
 import { AddressesContext } from "@/contexts/addressesCtx";
+import databaseAPI from "@/apis/databaseAPI";
+import { TOrderProduct } from "./useOrders";
+import { TAddress } from "./useAddresses";
 const api = paymentAPI();
 
 export function useStripeLocalCustomer() {
@@ -42,20 +45,23 @@ export default function usePayment(amount: number){
   const initializePaymentSheet = async () => {
     const {
       paymentIntent,
+      paymentIntentSecret,
       ephemeralKey,
       customer,
     } = await api.paymentSheetParams({
-      amount,
+      amount : amount,
       localCustomerId: localStripeCustomer.trim(),
     });
+    console.warn(paymentIntent);
     if (!localStripeCustomer) {
       setLocalStripeCustomer(customer);
     }
     const { error } = await initPaymentSheet({
       merchantDisplayName: "Lili's Delivery",
       customerId: customer,
+      returnURL: 'exp://128.0.0.1:8081/--/(app)/(tabs)/orders',
       customerEphemeralKeySecret: ephemeralKey,
-      paymentIntentClientSecret: paymentIntent,
+      paymentIntentClientSecret: paymentIntentSecret,
       // Set `allowsDelayedPaymentMethods` to true if your business can handle payment
       //methods that complete payment after a delay, like SEPA Debit and Sofort.
       allowsDelayedPaymentMethods: true,
@@ -84,32 +90,35 @@ export default function usePayment(amount: number){
     return paymentIntent;
   };
 
-  const openPaymentSheet = async () => {
+  const openPaymentSheet = async (orderData: TOrderData) => {
     setLoading(true);
-    
-    let error;
-    let paymentIntent;
-    try {
-      paymentIntent = await initializePaymentSheet();
-      error = (await presentPaymentSheet()).error;
-    } catch (err) {
-      console.error(err);
-      setLoading(false);
-      feedback('❌💳 We are having troubles connecting the payment system');
-      return;
+    let paymentIntent = await initializePaymentSheet();
+    let { error } = (await presentPaymentSheet());
+    await databaseAPI().createOrder({
+      ...orderData,
+      paymentIntent: paymentIntent,
+    });
+    if (error) {
+      throw new Error(error.code);
     }
-
     setLoading(false);
-    if (error) {  
-      console.error('stripe payment-sheet error', JSON.stringify(error, null, 2));
-      throw error;
-    }
-    return paymentIntent;
   };
-
   return {
     openPaymentSheet,
     loading,
   }
-
 } 
+
+export type TPaymentOrderData = TOrderData & {
+  paymentIntent: string,
+};
+
+export type TOrderData = {
+  order: TOrderProduct[],
+  orderTotal: number,
+  shippingAddress: TAddress | null,
+  shippingComment: string,
+  shippingContact: string,
+  userId: string,
+  branchId: string, 
+}

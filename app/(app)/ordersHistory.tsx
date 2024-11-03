@@ -6,6 +6,7 @@ import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { AuthContext } from "@/contexts/authCtx";
 import { TProduct } from "@/hooks/useCatalog";
+import { Stack } from "expo-router";
 import React, { useContext, useEffect, useState, useCallback } from "react";
 import { ScrollView } from "react-native";
 
@@ -43,27 +44,33 @@ export default function PendingOrdersScreen() {
   const { ordersHistory } = usePendingOrders();
   if (ordersHistory.length < 1) {
     return (
-      <ThemedView style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-        <CenteredText>🤷🏻 No orders yet</CenteredText>
-        <StyledLink href={'/(app)/(tabs)'}>
-          🏬 Go to Business Screen
-        </StyledLink>
-      </ThemedView>
+      <>
+        <Stack.Screen options={{ headerBackTitle: 'Back', headerTitle: 'Orders History' }} /> 
+        <ThemedView style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+          <CenteredText>🤷🏻 No orders yet</CenteredText>
+          <StyledLink href={'/(app)/(tabs)'}>
+            🏬 Go to Business Screen
+          </StyledLink>
+        </ThemedView>
+      </>
     )
   }
   return (
-    <ThemedView style={{ flex: 1 }}>
-      <ScrollView>
-        {
-          ordersHistory.reverse().map((order, index) => (
-            <HistoryOrderListItem 
+    <>
+      <Stack.Screen options={{ headerBackTitle: 'Back', headerTitle: 'Orders History' }} /> 
+      <ThemedView style={{ flex: 1 }}>
+        <ScrollView>
+          {
+            ordersHistory.reverse().map((order, index) => (
+              <HistoryOrderListItem 
               key={index} 
               {...order}
               />
-          ))
-        }
-      </ScrollView>
-    </ThemedView>
+            ))
+          }
+        </ScrollView>
+      </ThemedView>
+    </>
   );
 }
 

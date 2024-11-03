@@ -10,16 +10,10 @@ export default function paymentAPI() {
           providedCustomerId: localCustomerId,
         }),
       });
-      if (Object.hasOwn(response, 'errorMessage')) {
-        return {
-          paymentIntent: null,
-          ephemeralKey: null,
-          customer: null,
-        }
-      }
-      const { paymentIntent, ephemeralKey, customer } = response;
+      const { paymentIntent, paymentIntentSecret, ephemeralKey, customer } = response;
       return {
         paymentIntent,
+        paymentIntentSecret,
         ephemeralKey,
         customer
       }
