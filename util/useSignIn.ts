@@ -1,12 +1,13 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { TUserData } from '@/apis/firebase';
-import auth from '@react-native-firebase/auth';
+import auth, { deleteUser, getAuth } from '@react-native-firebase/auth';
 import databaseAPI from '@/apis/databaseAPI';
 import { Platform } from 'react-native';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import clientIdGetter from './clientIdManager';
 import feedback from './feedback';
 import toJSON from './toJSON';
+import { promiseAlert, PromptOptions } from './promiseAlert';
 const clientsId = clientIdGetter();
 
 export type TErrorMessage = {
@@ -28,6 +29,57 @@ export default function useSignIn () {
       console.error(`Google Sign-in ${err}`);
     }
   }, [clientsId]);
+
+  const signInWithEmailAndPassword = useCallback(async (email: string, password: string) => {
+    setIsLoading(true);
+    try {
+      await getAuth().signInWithEmailAndPassword(email, password);
+    } catch (err: any) {
+      if (err.code == 'auth/wrong-password') {
+        feedback('Wrong Password');
+        return;
+      }
+      if (err.code == 'auth/user-not-found') {
+        feedback('User not found');
+        return;
+      }
+      feedback(`🤔 Something weird is happening here, please contact for support...`);
+      console.warn(`Google Sign-in ${err}`);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  const deleteAccount = useCallback(async () => {
+    const options: PromptOptions = [
+      {
+        text: 'Delete Account Anyway',
+        onPress: async () => {
+          try {
+            if (user) {
+              await databaseAPI().deleteUser(auth().currentUser?.uid || '');
+              await deleteUser(user);
+              await auth().signOut();
+            }
+          } catch (err: any) {
+            feedback('Error deleting account');
+            console.error(`Error trying to delete account: ${err}`);
+            return;
+          }
+        },
+      },
+      {
+        text: 'Cancel, I\'ll do it later',
+        onPress: () => {},
+      },
+    ];
+
+    promiseAlert(
+      'Delete Account', 
+      'Are you sure you want to delete your account? if you accept you\'ll loose all your data.', 
+      options
+    );
+  }, []);
 
   const handleAuthOnMount = useCallback(() => {
     configureSignIn();
@@ -78,5 +130,13 @@ export default function useSignIn () {
     }
   }
 
-  return { user, isLoading: isLoading, signInWithGoogle, signInWithApple, logout };
+  return { 
+    user,
+    deleteAccount, 
+    isLoading, 
+    signInWithGoogle, 
+    signInWithApple, 
+    signInWithEmailAndPassword,
+    logout 
+  };
 };  

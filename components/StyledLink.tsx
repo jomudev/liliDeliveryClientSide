@@ -7,7 +7,7 @@ export type StyledLinkProps = PropsWithChildren & LinkProps & {
   href: Href<string>,
 };
 
-export default function StyledLink ({ children, href }: StyledLinkProps) {
+export default function StyledLink ({ children, href, style }: StyledLinkProps) {
   const theme = useColorScheme();
   return (
     <Link 
@@ -15,7 +15,8 @@ export default function StyledLink ({ children, href }: StyledLinkProps) {
       asChild
       style={[
         styles.container, 
-        { backgroundColor: theme == 'dark' ?  'rgba(0, 0, 0, 0.1)' : 'rgba(255, 255, 255, 0.3)'}
+        { backgroundColor: theme == 'dark' ?  'rgba(0, 0, 0, 0.1)' : 'rgba(255, 255, 255, 0.3)'},
+        style,
       ]} >
       <Pressable>
         <ThemedText type='defaultSemiBold' style={{ textAlign: 'center' }}> { children } </ThemedText> 

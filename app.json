@@ -14,13 +14,18 @@
     },
     "ios": {
       "supportsTablet": true,
+      "buildNumber": "2",
       "bundleIdentifier": "com.jomudev.liliDeliveryCustomer",
       "googleServicesFile": "./GoogleService-Info.plist",
       "config": {
         "googleMapsApiKey": "AIzaSyA3YfjzBEYm4naIr9tEySbD2gnYWX5OmBU"
+      },
+      "infoPlist": {
+        "NSCameraUsageDescription": "This app uses the camera to take profile pictures."
       }
     },
     "android": {
+      "buildNumber": "1",
       "config": {
         "googleMaps": {
           "apiKey": "AIzaSyDgtyMSNRWp5gDwBDuLJAEFe1v_oUtI4e8",
@@ -62,7 +67,7 @@
       [
         "expo-location",
         {
-          "locationAlwaysAndWhenInUsePermission": "Allow $(PRODUCT_NAME) to use your location."
+          "locationAlwaysAndWhenInUsePermission": "$(PRODUCT_NAME) need to access your location to deliver your order.."
         }
       ],
       "expo-build-properties"

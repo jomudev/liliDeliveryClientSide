@@ -18,7 +18,7 @@ import usePayment from '@/hooks/usePayment';
 import LoadingIndicator from '@/components/LoadingIndicator';
 import toJSON from '@/util/toJSON';
 import { Colors } from '@/constants/Colors';
-import { router } from 'expo-router';
+import { router, Stack } from 'expo-router';
 import { TAddress } from '@/hooks/useAddresses';
 
 export type CartDetailTextProps = TextProps & ThemedTextProps & { leftText: string, rightText: string };
@@ -29,10 +29,6 @@ export const CartDetailText = ({ leftText, rightText, ...otherProps }: CartDetai
     <ThemedText {...otherProps}>{rightText}</ThemedText>
   </ThemedView>
 );
-
-function getAddressLine(address) {
-  return address ? `${address.addressLine1}, ${address.addressLine2}` : '';
-}
 
 export default function OrderScreen() {
   const theme = useColorScheme() || 'light';
@@ -52,7 +48,15 @@ export default function OrderScreen() {
   }, [selectedAddress]);
 
   const pay = async () => {
-    console.group('💳 Payment');
+    if (!user) {
+      feedback('Please sign in to continue');
+      router.navigate('/sign-in'); 
+      return;
+    }
+    if (shippingAddress.current == null) {
+      feedback('Please select a shipping address');
+      return;
+    }
     setIsLoading(true);
     try {
       if (!orderSubtotal || !user?.uid || !branchOrder) {
@@ -71,7 +75,7 @@ export default function OrderScreen() {
       router.push('/(app)/ordersHistory');
     } catch (err) {
       console.error(err);
-      if (err === 'payment_canceled') return;
+      if (err.code === 'Canceled') return;
       feedback('❌💳 There was an issue with the payment process');
     } finally {
       setIsLoading(false);
@@ -85,56 +89,64 @@ export default function OrderScreen() {
 
   if (order.length < 1) {
     return (
-      <ThemedView style={styles.emptyOrdersContainer}>
-        <ThemedText style={styles.centeredText}>🤷🏻 No active order yet</ThemedText>
-        <StyledLink href={'/(app)/(tabs)'}>🏬 Go to Business Screen</StyledLink>
-        <StyledLink href={'/(app)/ordersHistory'}>⌛️ Go to Orders History Screen</StyledLink>
-      </ThemedView>
+      <>
+        <Stack.Screen options={{ headerShown: false, headerTitle: 'Orders' }} />
+        <ThemedView style={styles.emptyOrdersContainer}>
+          <ThemedText style={styles.centeredText}>🤷🏻 No active order yet</ThemedText>
+          <StyledLink href={'/(app)/(tabs)/(explore)'}>🏬 Go to Business Screen</StyledLink>
+          <StyledLink href={'/(app)/ordersHistory'}>⌛️ Go to Orders History Screen</StyledLink>
+        </ThemedView>
+      </>
     );
   }
 
   return (
-    <ThemedView style={styles.mainContainer}>
-      <SafeAreaView style={styles.container}>
-        <ScrollView>
-          {order.map((product) => (
-            <OrderProduct
-              key={product.id} {...product}
-              onChangeQuantity={(quantity) => modifyOrderProduct({ ...product, quantity })}
-              onHandleDelete={() => removeProductFromOrder(product.id)}
-            />
-          ))}
-          <CartDetailText leftText="Sub Total:" rightText={toCurrency(orderSubtotal)} />
-          <CartDetailText leftText="Shipping Fees:" rightText="Free" />
-          <View style={styles.form}>
-            <ThemedText type="subtitle">Provide a shipping contact</ThemedText>
-            <Input
-              numberOfLines={1}
-              onChangeText={(text) => (shippingContact.current = text)}
-              dataDetectorTypes="phoneNumber"
-              textContentType="telephoneNumber"
-              leftIcon={{ name: 'phone', color: Colors[theme].icon }}
-              placeholder="+1 (555) 555-5555"
-            />
-            <ThemedText type="subtitle">Select Shipping Address</ThemedText>
-            <AddressSelector onSelectAddress={(address) => (shippingAddress.current = address)} />
-            <ThemedText type="subtitle">Add shipping instructions</ThemedText>
-            <Input
-              numberOfLines={4}
-              onChangeText={(text) => (shippingComment.current = text)}
-              leftIcon={{ name: 'comment', color: Colors[theme].icon }}
-              placeholder="May you..?"
-            />
-          </View>
-        </ScrollView>
-        <ThemedView style={styles.footer}>
-          <CartDetailText leftText="Total" type="title" rightText={toCurrency(orderSubtotal)} />
-          <Button isLoading={isLoading} onPress={pay} style={styles.payButton}>
-            <ThemedText type="subtitle" lightColor="#fff" darkColor="#111">Continue Pay</ThemedText>
-          </Button>
-        </ThemedView>
-      </SafeAreaView>
-    </ThemedView>
+    <>
+      <Stack.Screen options={{ headerShown: false, headerTitle: 'Orders' }} />
+      <ThemedView style={styles.mainContainer}>
+        <SafeAreaView style={styles.container}>
+          <ScrollView>
+            {order.map((product) => (
+              <OrderProduct
+                key={product.id} {...product}
+                onChangeQuantity={(quantity) => modifyOrderProduct({ ...product, quantity })}
+                onHandleDelete={() => removeProductFromOrder(product.id)}
+              />
+            ))}
+            <CartDetailText leftText="Sub Total:" rightText={toCurrency(orderSubtotal)} />
+            <CartDetailText leftText="Shipping Fees:" rightText="Free" />
+            <View style={styles.form}>
+              <ThemedText type="subtitle">Provide a shipping contact</ThemedText>
+              <Input
+                numberOfLines={1}
+                onChangeText={(text) => (shippingContact.current = text)}
+                dataDetectorTypes="phoneNumber"
+                textContentType="telephoneNumber"
+                leftIcon={{ name: 'phone', color: Colors[theme].icon }}
+                placeholder="+1 (555) 555-5555"
+              />
+              <ThemedText type="subtitle">Select Shipping Address</ThemedText>
+              <AddressSelector 
+                onSelectAddress={(address) => (shippingAddress.current = address)} 
+              />
+              <ThemedText type="subtitle">Add shipping instructions</ThemedText>
+              <Input
+                numberOfLines={4}
+                onChangeText={(text) => (shippingComment.current = text)}
+                leftIcon={{ name: 'comment', color: Colors[theme].icon }}
+                placeholder="May you..?"
+              />
+            </View>
+          </ScrollView>
+          <ThemedView style={styles.footer}>
+            <CartDetailText leftText="Total" type="title" rightText={toCurrency(orderSubtotal)} />
+            <Button isLoading={isLoading} onPress={pay} style={styles.payButton}>
+              <ThemedText type="subtitle" lightColor="#fff" darkColor="#111">Continue Pay</ThemedText>
+            </Button>
+          </ThemedView>
+        </SafeAreaView>
+      </ThemedView>
+    </>
   );
 }
 

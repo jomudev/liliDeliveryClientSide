@@ -1,6 +1,6 @@
 import { Container } from "@/components/Container";
 import { Input } from "@rneui/themed";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { Pressable, StyleSheet, View, ScrollView} from "react-native";
 import * as Location from 'expo-location'
 import MapView, { Marker, PROVIDER_GOOGLE, Region } from 'react-native-maps';
@@ -18,6 +18,7 @@ import UID from "@/util/UID";
 export function useLocation() {
   const [location, setLocation] = useState<Location.LocationObject>();
   const [loadingLocation, setLoadingLocation] = useState<boolean>(true);
+  let address = useRef<Location.LocationGeocodedAddress>();
   useEffect(() => {
     (async function () {
       let { status } = await Location.requestForegroundPermissionsAsync();
@@ -30,17 +31,21 @@ export function useLocation() {
         feedback('Error trying to get Location');
         return;
       }
+      address.current = (await Location.reverseGeocodeAsync({
+        latitude: givenLocation.coords.latitude,
+        longitude: givenLocation.coords.longitude,
+      }))[0];
       setLocation(givenLocation);
       setLoadingLocation(false);
     })()
   }, []);
 
-  return { location, setLocation, loadingLocation };
+  return { location, setLocation, loadingLocation, address: address.current };
 }
 
 function getAddressComponents(address: GeocodeResult) {
   const findAddressComponent = (value: string) => address.addressComponents.find((addressComponent) => addressComponent.types.includes(value))?.long_name;
-
+  
   let street = findAddressComponent('route') || '';
   let streetNumber = findAddressComponent('street_number') || '';
   let neighborhood = findAddressComponent('neighborhood') || '';
@@ -150,7 +155,7 @@ export default function addAddressScreen () {
 
   return (
     <>
-      <Stack.Screen options={{ headerTitle: 'Add Address', headerBackTitle: 'Back' }} />
+      <Stack.Screen options={{ headerTitle: 'Add Address'}} />
       <Container>
         <ScrollView>
           <MapView 

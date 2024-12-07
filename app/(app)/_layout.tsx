@@ -1,13 +1,14 @@
-import { Stack } from 'expo-router';
+import { SplashScreen, Stack } from 'expo-router';
 import 'react-native-reanimated';
-import React from 'react';
-import AuthHandler from '@/components/AuthHandler';
+import React, { useEffect } from 'react';
 
 export default function HomeLayout() {
+  
+  useEffect(() => {
+    SplashScreen.hideAsync();
+  }, []);
 
   return (
-    <AuthHandler>
-      <Stack/>
-    </AuthHandler>
+    <Stack screenOptions={{ headerBackTitleVisible: false }} />
   );
 }

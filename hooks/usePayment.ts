@@ -94,12 +94,14 @@ export default function usePayment(amount: number){
     setLoading(true);
     let paymentIntent = await initializePaymentSheet();
     let { error } = (await presentPaymentSheet());
-    await databaseAPI().createOrder({
-      ...orderData,
-      paymentIntent: paymentIntent,
-    });
+    if (!error) {
+      await databaseAPI().createOrder({
+        ...orderData,
+        paymentIntent: paymentIntent,
+      });
+    }
     if (error) {
-      throw new Error(error.code);
+      throw error;
     }
     setLoading(false);
   };

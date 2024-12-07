@@ -5,6 +5,6 @@ import React from 'react';
 export default function ExploreLayout() {
 
   return (
-    <Stack />
+    <Stack screenOptions={{ headerShown: false}} />
   );
 }

@@ -13,9 +13,15 @@ export default function ProductsAPI () {
         }),
       }) || [];
     },
+
     async getProduct (id: number) {
       return apiFetch(`/products/${id}`);
     },
+
+    async getProductsCategories (branchId: string): Promise<string[]> {
+      return apiFetch(`/products/categories/${branchId}`);
+    },
+
     async getProductsWithPagination (branchId: string, page: number, length: number): Promise<TProduct[]> {
       return apiFetch(`/products/productsWithPagination`, {
         method: 'POST',

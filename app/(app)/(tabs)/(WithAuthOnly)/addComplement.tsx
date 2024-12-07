@@ -15,7 +15,7 @@ import toCurrency from "@/util/toCurrency";
 import toJSON from "@/util/toJSON";
 import UID from "@/util/UID";
 import { CheckBox } from "@rneui/themed";
-import { Stack, useLocalSearchParams, useNavigation } from "expo-router";
+import { router, Stack, useLocalSearchParams, useNavigation } from "expo-router";
 import React, { useContext, useEffect, useState } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 
@@ -106,7 +106,7 @@ export default function AddComplementsScreen() {
       complements: selectedComplements,
       quantity: 1,
     });
-    setTimeout(() => navigation.goBack(), 300);
+    setTimeout(() => router.back(), 300);
   }
   
   if (loading) return <LoadingIndicator loadingText="Loading Side Dishes..." />;
