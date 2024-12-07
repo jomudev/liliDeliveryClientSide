@@ -44,11 +44,11 @@ export default function BranchScreen() {
         }
         headerContent={ 
           <ParallaxViewHeader 
-          title={`🏬 ${branchInfo.name}`} 
-          subtitle={Boolean(branchInfo.description) ? `✨ ${branchInfo.description}` : ''}
-          lightColor='white'
-          darkColor='white'
-          />
+            title={`🏬 ${branchInfo.name}`} 
+            subtitle={Boolean(branchInfo.description) ? `✨ ${branchInfo.description}` : ''}
+            lightColor='white'
+            darkColor='white'
+            />
         }
         >
           <ThemedView style={styles.container}>

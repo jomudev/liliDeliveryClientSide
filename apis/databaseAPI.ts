@@ -4,9 +4,11 @@ import { TProduct } from "@/hooks/useCatalog";
 import { TBusiness } from "@/contexts/businessCtx";
 import { TOrder, TOrderProduct } from "@/hooks/useOrders";
 import { TAddress } from "@/hooks/useAddresses";
-import { TGroupedComplements } from "@/app/(app)/addComplement";
+import { TGroupedComplements } from "@/app/(app)/(tabs)/(WithAuthOnly)/addComplement";
 import feedback from "@/util/feedback";
 import { TOrderData } from "@/hooks/usePayment";
+
+let alertShowed = false;
 
 const apiURL = process.env.NODE_ENV === 'development' && Platform.OS === 'android' 
   ? "http://10.0.2.2:3000" 
@@ -39,7 +41,12 @@ export async function apiFetch<T>(pathName: string, options?: RequestInit): Prom
 
   } catch (error) {
     console.error(`Error in request to ${route}:`, error);
-    feedback(`Error: Could not connect to the server. Please try again later.`);
+    if (!alertShowed) {
+      alertShowed = true;
+      feedback(`Error: Could not connect to the server. Please try again later.`, () => {
+        alertShowed = false;
+      });
+    }
     return null;
   }
 }
@@ -48,6 +55,15 @@ export default function useApi() {
   return {
     async getProduct(productId: string): Promise<TProduct | null> {
       return apiFetch<TProduct>(`/products/${productId}`);
+    },
+
+    async deleteUser(uid: string) {
+      await apiFetch("/api/deleteUser", {
+        method: 'POST',
+        body: JSON.stringify({
+          uid,
+        }),
+      });
     },
 
     async createUser(user: TUserData): Promise<void> {

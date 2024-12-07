@@ -1,12 +1,12 @@
-import { Stack, Tabs } from 'expo-router';
+import { Stack, Tabs, usePathname } from 'expo-router';
 import React from 'react';
 import { TabBarIcon } from '@/components/navigation/TabBarIcon';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();   
-
+  const colorScheme = useColorScheme();
+  const pathname = usePathname();
   return (
     <>
       <Stack.Screen options={{ headerShown: false }}/>
@@ -25,20 +25,12 @@ export default function TabLayout() {
           }}
         />
         <Tabs.Screen
-          name="orders"
+          name="(WithAuthOnly)"
           options={{
-            title: 'My Orders',
+            title: 'Orders',
+            headerShown: false,
             tabBarIcon: ({ color, focused }) => (
               <TabBarIcon name={focused ? 'basket' : 'basket-outline'} color={color} />
-            ),
-          }}
-        />
-        <Tabs.Screen
-          name="addresses"
-          options={{
-            title: 'My Addresses',
-            tabBarIcon: ({ color, focused }) => (
-              <TabBarIcon name={focused ? 'map' : 'map-outline'} color={color} />
             ),
           }}
         />

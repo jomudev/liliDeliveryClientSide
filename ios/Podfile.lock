@@ -18,9 +18,9 @@ PODS:
     - ExpoModulesCore
   - EXManifests (0.14.3):
     - ExpoModulesCore
-  - Expo (51.0.32):
+  - Expo (51.0.34):
     - ExpoModulesCore
-  - expo-dev-client (4.0.26):
+  - expo-dev-client (4.0.25):
     - EXManifests
     - expo-dev-launcher
     - expo-dev-menu
@@ -1686,18 +1686,18 @@ PODS:
   - RecaptchaInterop (100.0.0)
   - RNCAsyncStorage (1.23.1):
     - React-Core
-  - RNFBAnalytics (20.5.0):
+  - RNFBAnalytics (20.4.0):
     - Firebase/Analytics (= 10.29.0)
     - React-Core
     - RNFBApp
-  - RNFBApp (20.5.0):
+  - RNFBApp (20.4.0):
     - Firebase/CoreOnly (= 10.29.0)
     - React-Core
-  - RNFBAuth (20.5.0):
+  - RNFBAuth (20.4.0):
     - Firebase/Auth (= 10.29.0)
     - React-Core
     - RNFBApp
-  - RNFBCrashlytics (20.5.0):
+  - RNFBCrashlytics (20.4.0):
     - Firebase/Crashlytics (= 10.29.0)
     - FirebaseCoreExtension
     - React-Core
@@ -2151,8 +2151,8 @@ SPEC CHECKSUMS:
   EXJSONUtils: 30c17fd9cc364d722c0946a550dfbf1be92ef6a4
   EXLocation: 43e9b582ca63a23c6f0a18d8cbe2145b3a388b55
   EXManifests: c1fab4c3237675e7b0299ea8df0bcb14baca4f42
-  Expo: 33132a667698a3259a4e6c0af1b4936388e5fa33
-  expo-dev-client: 4f9100af6be210a360aa67f42649881251aa362a
+  Expo: 963ef4ae102e4f4ac114a8510d70127c44adffbf
+  expo-dev-client: 97910d9e4753f5deae96c3b657a071ee09ce85f5
   expo-dev-launcher: fe4f2c0a0aa627449eeaec5f9f11e04090f97c40
   expo-dev-menu: 5b14897ecce3a8cf9e9cf9109344c2c192a3766a
   expo-dev-menu-interface: be32c09f1e03833050f0ee290dcc86b3ad0e73e4
@@ -2252,10 +2252,10 @@ SPEC CHECKSUMS:
   ReactCommon: f79ae672224dc1e6c2d932062176883c98eebd57
   RecaptchaInterop: 7d1a4a01a6b2cb1610a47ef3f85f0c411434cb21
   RNCAsyncStorage: 826b603ae9c0f88b5ac4e956801f755109fa4d5c
-  RNFBAnalytics: 6ffcca3c60f402775f59d23402287e14de97616b
-  RNFBApp: 5f87753a8d8b37d229adf85cd0ff37709ffdf008
-  RNFBAuth: ecbb030e0fd3551b8bc36cc85e0ebb1bcfb7685e
-  RNFBCrashlytics: 9cc9eb22443f5a4c0f348efddd16318a80d2dd78
+  RNFBAnalytics: 2e647874278671963ef9049b4228acecfc88dd6d
+  RNFBApp: 2f83756f4d8be2859af5e2cf54130c20e380119d
+  RNFBAuth: ae6e6195e2cf783f8ad1977186925c61358c8ec9
+  RNFBCrashlytics: a845824a269968ebb7a4a6cf4772c4977125b5f6
   RNGestureHandler: 20a4307fd21cbff339abfcfa68192f3f0a6a518b
   RNGoogleSignin: 08dc4ba7eac2096c7fecfe109f0950fa4683c803
   RNReanimated: d51431fd3597a8f8320319dce8e42cee82a5445f

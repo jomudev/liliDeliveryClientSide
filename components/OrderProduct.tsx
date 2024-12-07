@@ -7,7 +7,7 @@ import { useColorScheme } from "@/hooks/useColorScheme";
 import { Colors } from "@/constants/Colors";
 import { useEffect, useState } from "react";
 import { ThemedText } from "./ThemedText";
-import { TComplement } from "@/app/(app)/addComplement";
+import { TComplement } from "@/app/(app)/(tabs)/(WithAuthOnly)/addComplement";
 import React from "react";
 import { totalizeByProperty } from "@/util/totalizeByProperty";
 

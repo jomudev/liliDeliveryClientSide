@@ -1,7 +1,6 @@
 import { BusinessContext, TBusiness } from "@/contexts/businessCtx";
 import BranchCard from "./BranchCard";
 import { useContext } from "react";
-import { StyleSheet } from "react-native";
 import LoadingIndicator from "./LoadingIndicator";
 import CenteredText from "./CenteredText";
 import React from "react";

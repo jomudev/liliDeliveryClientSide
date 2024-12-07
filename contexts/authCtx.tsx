@@ -5,11 +5,15 @@ import useSignIn from '@/util/useSignIn';
 export const AuthContext = createContext<{
   signIn: (method: signInMethods) => void;
   signOut: () => void;
+  deleteAccount: () => void;
+  signInWithEmailAndPassword: (email: string, password: string) => Promise<void>;
   user?: TUserData | null;
   isLoading: Boolean;
 }>({
   signIn: () => {},
   signOut: () => {},
+  deleteAccount: () => {},
+  signInWithEmailAndPassword: () => new Promise(()=> {}),
   user: null,
   isLoading: false,
 });
@@ -21,6 +25,8 @@ export function SessionProvider({ children }: PropsWithChildren) {
     user, 
     isLoading, 
     signInWithGoogle,  
+    signInWithEmailAndPassword,
+    deleteAccount,
     logout 
   } = useSignIn();
   
@@ -36,6 +42,8 @@ export function SessionProvider({ children }: PropsWithChildren) {
     <AuthContext.Provider
       value={{
         signIn,
+        deleteAccount,  
+        signInWithEmailAndPassword,
         signOut,
         user,
         isLoading,

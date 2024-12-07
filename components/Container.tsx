@@ -17,6 +17,7 @@ export function Container ({ children, ...otherProps }: PropsWithChildren & Them
 const styles = StyleSheet.create({
   mainContainer: {
     flex: 1,
+    padding: 8,
   },
   container: {
     flex: 1,

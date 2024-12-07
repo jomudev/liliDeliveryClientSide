@@ -3,7 +3,7 @@ import { ThemedText } from "./ThemedText";
 import { Pressable, StyleSheet, View } from "react-native";
 import Product from "./Product";
 import UID from "@/util/UID";
-import { memo, useRef, useState } from "react";
+import { memo, useEffect, useRef, useState } from "react";
 import ProductsAPI from "@/apis/ProductsAPI";
 import React from "react";
 import LoadingIndicator from "./LoadingIndicator";
@@ -18,15 +18,18 @@ const MemoProduct = memo(Product);
 const productsAPI = ProductsAPI();
 
 export default function Category({ name, products }: CategoryProps) {
-  const [categoryProducts, setCategoryProducts] = useState([...products]);
+  const [categoryProducts, setCategoryProducts] = useState<TProduct[]>(products?.length ? products : []); 
   let { branchId } = useLocalSearchParams();
   const page = useRef(1);
   branchId = branchId.toString();
-  const getMoreProducts = async () => {
-    const fetchedProducts = await productsAPI.getCategoryProducts(branchId, name, page.current, (page.current + 1) * 5);
-    setCategoryProducts((prevProducts) => [...prevProducts, ...fetchedProducts]);
-    page.current += 1;
-  };
+  
+  useEffect(() => {
+    if (name === '') return;
+    productsAPI.getCategoryProducts(branchId, name, page.current, (page.current + 1) * 5).then((fetchedProducts) => {
+      setCategoryProducts((prevProducts) => [...prevProducts, ...fetchedProducts]);
+      page.current += 1;
+    });
+  }, [name]);
 
   const renderProduct = (product: TProduct) => (
     <MemoProduct key={UID().generate()} {...product} branchId={branchId} />
@@ -34,18 +37,10 @@ export default function Category({ name, products }: CategoryProps) {
 
   return (
     <View>
-      <CategoryHeader name={name} />
       {categoryProducts.map(renderProduct)}
-      {/* <LoadMoreButton onPress={async () => await getMoreProducts()} name={name} /> */}
     </View>
   );
 }
-
-const CategoryHeader = ({ name }: { name: string }) => (
-  <View style={styles.categoryHeader}>
-    <ThemedText>{name}</ThemedText>
-  </View>
-);
 
 export const LoadMoreButton = ({ onPress, name }: { onPress: () => Promise<void>, name: string }) => {
   const [isLoading, setIsLoading] = useState(false);

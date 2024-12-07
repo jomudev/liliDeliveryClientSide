@@ -14,11 +14,17 @@
       }
     },
     "preview": {
-      "distribution": "internal"  
+      "distribution": "internal" 
     },
     "production": {}
   },
   "submit": {
-    "production": {}
+    "production": {
+      "ios": {
+        "appleId": "joannmurillo81@gmail.com",
+        "ascAppId": "6738162388",
+        "appleTeamId": "B922NJL8L6"
+      }
+    }
   }
 }

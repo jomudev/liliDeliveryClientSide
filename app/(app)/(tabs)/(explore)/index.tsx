@@ -10,7 +10,7 @@ import { Avatar } from '@rneui/themed';
 import { ThemedView } from '@/components/ThemedView';
 import React from 'react';
 import Branches from '@/components/Branches';
-import { Stack } from 'expo-router';
+import { router, Stack } from 'expo-router';
 
 export default function HomeScreen() {
   const [headerImage, setHeaderImage] = useState('');
@@ -39,7 +39,16 @@ export default function HomeScreen() {
           subtitle={"🔍 Discover Your Faves! 💖"}
           lightColor='white'
           darkColor='white'>
-          <Avatar size={32} onPress={() => signOut()} source={{ uri: user?.photoURL }} rounded containerStyle={styles.avatar} />
+            {
+              user &&
+              <Avatar 
+                size={32} 
+                onPress={() => router.navigate('/settings')}
+                source={{ uri: user?.photoURL }} 
+                rounded 
+                containerStyle={styles.avatar} 
+                />
+            }
         </ParallaxViewHeader>} showBackButton={false}>
         <ThemedView style={styles.container}>
           <Branches />

@@ -18,7 +18,7 @@ export default function OrderBanner({ order }: OrderBannerProps) {
   const theme = useColorScheme() ?? "light";
   const slideAnim = useRef(new Animated.Value(1)).current;
 
-  if (pathname === "/orders" || order.length === 0) return null;
+  if (pathname === "/orders" || "/login" || order.length === 0) return null;
 
   const toggleBanner = () => {
     Animated.timing(slideAnim, {

@@ -1,4 +1,4 @@
-import { TComplement } from "@/app/(app)/addComplement";
+import { TComplement } from "@/app/(app)/(tabs)/(WithAuthOnly)/addComplement";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useCallback, useEffect, useReducer, useRef, useState } from "react";
 import { Alert } from "react-native";

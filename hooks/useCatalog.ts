@@ -20,17 +20,16 @@ export type TCatalog = {
 
 const productsAPI = ProductsAPI();
 
-export function useCatalog(businessId: string) {
+export function useCatalog(branchId: string) {
   const [catalog, setCatalog] = useState<TCatalog>({});
   const ids = useRef<{ [index: string]: number }>({});
   const [isLoading, setIsLoading] = useState(true);
-  const currentBusinessId = useRef(businessId);
+  const currentBranchId = useRef(branchId);
 
 
-  const loadMoreProducts = async (branchId: string, page: number): Promise<number> => {
-    const fetchedProducts = await productsAPI.getProductsWithPagination(branchId.toString(), page, 10) || [];  
+  const loadMoreProducts = async (productsBranchId: string, page: number): Promise<number> => {
+    const fetchedProducts = await productsAPI.getProductsWithPagination(productsBranchId.toString(), page, 10) || [];  
     setCatalog((prevCatalog) => ({
-      ...prevCatalog,
       ...fetchedProducts.reduce((acc, product) => {
         if (!acc[product.category]) {
           acc[product.category] = [];
@@ -38,34 +37,39 @@ export function useCatalog(businessId: string) {
         acc[product.category].push(product);
         ids.current[product.category] = product.categoryId;
         return acc;
-      }, {}),
+      }, { ...prevCatalog }),
     }));
     return page + 1;
   };
 
   const getCatalog = useCallback(async () => {
-    if (currentBusinessId.current === businessId && Object.keys(catalog).length > 0) return;
-
+    if (currentBranchId.current === branchId && Object.keys(catalog).length > 0) return;
     setIsLoading(true);
-    currentBusinessId.current = businessId;
+    currentBranchId.current = branchId;
     const preparedCatalog: TCatalog = {};
-    const products = await productsAPI.getProductsWithPagination(businessId, 1, 10) || [];
+    const products = await productsAPI.getProductsWithPagination(branchId, 1, 10) || [];
 
     products.forEach((product: TProduct) => {
       if (!preparedCatalog[product.category]) {
         preparedCatalog[product.category] = [];
       }
-      preparedCatalog[product.category].push(product);
+      Object.entries(catalog).forEach(([category, products]) => {
+        products.forEach((product) => {
+          let productExist = products.find((p) => p.id === product.id);
+          if (!productExist) {
+            preparedCatalog[category].push(product);
+          }
+        });
+      });
       ids.current[product.category] = product.categoryId;
     });
-
     setCatalog(preparedCatalog);
     setIsLoading(false);
-  }, [businessId]);
+  }, [branchId]);
 
   useEffect(() => {
     getCatalog();
   }, [getCatalog]);
 
-  return { loadMoreProducts, catalog, categoryId: ids.current, isLoading, businessId };
+  return { loadMoreProducts, catalog, categoryId: ids.current, isLoading, branchId };
 }

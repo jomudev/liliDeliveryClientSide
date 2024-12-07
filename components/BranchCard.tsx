@@ -39,7 +39,7 @@ export default function BranchCard ({
               { description }
             </ThemedText>
           </ThemedView>
-        <BlurView intensity={60} tint={'dark'} style={[styles.businessDetails, styles.averageDeliveryTime]}>
+        {/* <BlurView intensity={60} tint={'dark'} style={[styles.businessDetails, styles.averageDeliveryTime]}>
           <ThemedText style={styles.averageDeliveryTimeText} lightColor="white" darkColor="white">
             { averageDeliveryTime } min
           </ThemedText>
@@ -49,7 +49,7 @@ export default function BranchCard ({
           <ThemedText style={styles.deliveryPriceText} lightColor="white" darkColor="white">
             { toCurrency(deliveryPrice) }
           </ThemedText>
-        </BlurView>
+        </BlurView> */}
       </Pressable>
     </Link>
   );
