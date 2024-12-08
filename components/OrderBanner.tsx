@@ -17,9 +17,6 @@ export default function OrderBanner({ order }: OrderBannerProps) {
   const pathname = usePathname();
   const theme = useColorScheme() ?? "light";
   const slideAnim = useRef(new Animated.Value(1)).current;
-
-  if (pathname === "/orders" || "/login" || order.length === 0) return null;
-
   const toggleBanner = () => {
     Animated.timing(slideAnim, {
       toValue: showBanner ? 0 : 1,
@@ -27,6 +24,8 @@ export default function OrderBanner({ order }: OrderBannerProps) {
       useNativeDriver: true,
     }).start(() => setShowBanner(!showBanner));
   };
+
+  if (pathname === "/orders" || pathname === "/login" || order.length < 1) return null;
 
   return (
     <View style={styles.container}>
@@ -99,8 +98,8 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   miniBanner: {
-    width: 72,
-    height: 72,
+    width: 52,
+    height: 52,
     justifyContent: "center",
     left: 20,
   },
